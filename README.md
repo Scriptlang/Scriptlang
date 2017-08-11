@@ -13,6 +13,10 @@ For now, we can only run scripts as tests.
 
 To run them, simply type on the command line:  
 
+`python test.pyc <scriptfile>`
+
+For example:
+
 `python test.pyc ex1.sl`
 
 Make sure your current working directory is `<top>/test`.
