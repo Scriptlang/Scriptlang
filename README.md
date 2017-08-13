@@ -11,7 +11,7 @@ Also, it will be possible to translate the intermediate language into any other 
 
 # How to compile
 
-We don't have a build system set in place just yet. You'll have to use Eclipse and import this project into your IDE. 
+We don't have an acessible build system set in place just yet. You'll have to use Eclipse and import this project into your IDE and compile it from there.
 
 # How to run  
 
