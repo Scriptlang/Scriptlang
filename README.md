@@ -7,8 +7,7 @@ It is an intermediate language that compiles to either Batch or Shell and is cap
 
 Also, it will be possible to translate the intermediate language into any other scripting language, for example Powershell.
 
-# IMPORTANT:
-# This is a long term project with no release date set  
+# NOTE: This is a long term project with no release date set  
 
 # How to run  
 
