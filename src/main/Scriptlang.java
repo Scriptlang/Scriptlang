@@ -1,30 +1,17 @@
 package main;
 
+import com.parser.AST_Root;
 import com.parser.ScriptlangParser;
-
-class Dbg {
-	private static boolean enabled = false;
-	private final static String promptPrefix = "Scriptlang";
-	
-	public static void setDebugging(boolean enableDebugging) {
-		enabled = enableDebugging;
-	}
-	
-	public static boolean log(Object o) {
-		if(!enabled)
-			return false;
-		System.out.println(promptPrefix + "> " + o.toString());
-		return true;
-	}
-}
+import com.parser.SimpleNode;
+import com.dbg.*;
+import com.jit.JITCompiler;
 
 public class Scriptlang {
 	public static void help() {
 		Dbg.setDebugging(true);
-		Dbg.log("HELP\nUsage: java main.Scriptlang <testfile>\nExample: java main.Scriptlang ../test/ex1.sl\n\n(Note: Current working directory must be <PROJECTFOLDER>/bin)");
-	}	
+		Dbg.log("HELP\n\nUsage: java main.Scriptlang <testfile>\nExample: java main.Scriptlang ../test/ex1.sl\n\n(Note: current working directory must be <top>/bin)");
+	}
 
-	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws Exception {
 		/* Check command line arguments */
 		if(args.length < 1) {
@@ -34,16 +21,24 @@ public class Scriptlang {
 		
 		/* Enable debugging messages */
 		Dbg.setDebugging(true);
-		Dbg.log("Parsing '"+ args[0] +"'...");
 		
 		/* Instantiate parser */
 		ScriptlangParser parser = new ScriptlangParser(new java.io.FileInputStream(args[0]));
 		
 		/* Parse input file */
-		parser.Input();
+		Dbg.log("1: Parsing '"+ args[0] +"'...");
+		parser._Root();
+		
+		/* Dump the AST structure */
+		if(Dbg.isDebugging())
+			Dbg.log("Dumping Root AST..." + ((SimpleNode)parser.rootNode()).dumpStr("* ") + "\n");
+
+		/* JIT Compile parsed file (compiles into the target and executes the result) */
+		Dbg.log("2: JIT Compiling and running '"+ args[0] +"'...");
+		JITCompiler.JITCompile(((AST_Root)parser.rootNode()));
 		
 		/* All done */
-		Dbg.log("Done parsing '"+ args[0] +"'.");
+		Dbg.log("3: Done parsing and interpreting '"+ args[0] +"'.");
 		
 		System.exit(0);
 	}

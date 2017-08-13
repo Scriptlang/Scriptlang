@@ -1,0 +1,189 @@
+/**----------------**/
+/** Parser options **/
+/**----------------**/
+options {
+    LOOKAHEAD              = 1;
+    CHOICE_AMBIGUITY_CHECK = 2;
+    OTHER_AMBIGUITY_CHECK  = 1;
+    STATIC                 = false;
+    DEBUG_PARSER           = false;
+    DEBUG_LOOKAHEAD        = false;
+    DEBUG_TOKEN_MANAGER    = false;
+    ERROR_REPORTING        = true;
+    JAVA_UNICODE_ESCAPE    = false;
+    UNICODE_INPUT          = false;
+    IGNORE_CASE            = false;
+    USER_TOKEN_MANAGER     = false;
+    USER_CHAR_STREAM       = false;
+    BUILD_PARSER           = true;
+    BUILD_TOKEN_MANAGER    = true;
+    SANITY_CHECK           = true;
+    FORCE_LA_CHECK         = false;
+    MULTI                  = true;
+    NODE_EXTENDS           = "CustomNode";
+    TRACK_TOKENS           = true;
+}
+
+PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
+package com.parser;
+
+import org.javacc.jjtree.JJTree;
+
+public class ScriptlangParser {
+    /** Get the root node of the AST **/
+    public Node rootNode() {
+    	return jjtree.rootNode();
+    }
+}
+
+PARSER_END(ScriptlangParser) /** ScriptLangParser Class - END **/
+
+/**--------------------**/
+/** Token declarations **/
+/**--------------------**/
+SKIP :
+{
+	" "
+|	"\t"
+|	"\n"
+|	"\r"
+}
+
+TOKEN :
+{
+	/* Block unit tokens */
+	<LBRACE: "{">
+|	<RBRACE: "}">
+
+	/* Primitive data types */
+|	<U8:    "u8"   >
+|	<U16:   "u16"  >
+|	<U32:   "u32"  >
+|	<U64:   "u64"  >
+|	<I8:    "i8"   >
+|	<I16:   "i16"  >
+|	<I32:   "i32"  >
+|	<I64:   "i64"  >
+|	<F32:   "f32"  >
+|	<F64:   "f64"  >
+|	<BOOL:  "bool" >
+|	<CHAR:  "char" >
+|	<USIZE: "usize">
+|	<ISIZE: "isize">
+|	<AUTO:  "auto" >
+
+	/* Literals */
+|	<INT_LITERAL: (<DIGIT>)+>
+
+	/* Identifiers */
+|	<IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)*>
+|	<#LETTER: ["a"-"z", "A"-"Z"]>
+|	<#DIGIT: ["0"-"9"]>
+}
+
+/**-----------------**/
+/** Root production **/
+/**-----------------**/
+void _Root() :
+{}
+{
+	( _All() )* <EOF>
+}
+
+void _All() #void : /* Matches any kind of top level construct               */
+{}                  /* (blocks ({}), statements and any kind of declaration) */
+{
+	_BlockUnit() | _Statement() | _GlobalDeclaration()
+}
+
+/**-------------------------**/
+/** Higher level constructs **/
+/**-------------------------**/
+void _BlockUnit() :
+{}
+{
+    <LBRACE> ( _All() )* <RBRACE>
+}
+
+void _Statement() :
+{}
+{
+	";"
+	{}
+}
+
+void _GlobalDeclaration() :
+{}
+{
+	","
+	{}
+}
+
+void _LocalDeclaration() :
+{}
+{
+	","
+	{}
+}
+
+/**----------------------------------**/
+/** Lower level *generic* constructs **/
+/**----------------------------------**/
+void _VariableDeclaration() : 
+{}
+{
+	{}
+}
+
+void _FunctionDeclaration() : 
+{}
+{
+	{}
+}
+
+void _Expression() : 
+{}
+{
+	{}
+}
+
+void _Assignment() : 
+{}
+{
+	{}
+}
+
+void _LabeledStatement() :
+{}
+{
+	<IDENTIFIER> ":" _Statement()
+	{}
+}
+
+void _Id() :
+{}
+{
+	{}
+}
+
+void _Literal() :
+{}
+{
+	{}
+}
+
+/**--------------------------------------**/
+/** Lower level *specialised* constructs **/
+/**--------------------------------------**/
+
+/**----------**/
+/** Literals **/
+/**----------**/
+
+/**-------------**/
+/** Expressions **/
+/**-------------**/
+
+/**------------**/
+/** Statements **/
+/**------------**/
