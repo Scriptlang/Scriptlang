@@ -29,6 +29,8 @@ PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
 package com.parser;
 
 import org.javacc.jjtree.JJTree;
+import com.parser.nodes.*;
+import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
 
 public class ScriptlangParser/*@bgen(jjtree)*/implements ScriptlangParserTreeConstants/*@egen*/ {/*@bgen(jjtree)*/
   protected JJTScriptlangParserState jjtree = new JJTScriptlangParserState();
@@ -59,7 +61,7 @@ TOKEN :
 	<LBRACE: "{">
 |	<RBRACE: "}">
 
-	/* Primitive data types */
+	/* Primitive data types. IMPORTANT: DO NOT CHANGE THE DECLARATION ORDER */
 |	<U8:    "u8"   >
 |	<U16:   "u16"  >
 |	<U32:   "u32"  >
@@ -75,9 +77,15 @@ TOKEN :
 |	<USIZE: "usize">
 |	<ISIZE: "isize">
 |	<AUTO:  "auto" >
+|   <ARRAY: "array">
 
 	/* Literals */
 |	<INT_LITERAL: (<DIGIT>)+>
+
+	/* Keywords */
+|	<FN: "fn">         /* Return type void for function declaration */
+|	<CLASS: "class">   /* Class declaration                         */
+|	<STRUCT: "struct"> /* Struct declaration                        */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)*>
@@ -125,7 +133,7 @@ void _Root() :
 void _All()       : /* Matches any kind of top level construct               */
 {}                  /* (blocks ({}), statements and any kind of declaration) */
 {
-	_BlockUnit() | _Statement() | _GlobalDeclaration()
+	_BlockUnit() | _Statement() | _Declaration()
 }
 
 /**-------------------------**/
@@ -192,73 +200,117 @@ void _Statement() :
 /*@egen*/
 }
 
-void _GlobalDeclaration() :
-{/*@bgen(jjtree) _GlobalDeclaration */
-  AST_GlobalDeclaration jjtn000 = new AST_GlobalDeclaration(JJT_GLOBALDECLARATION);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-  jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
-{/*@bgen(jjtree) _GlobalDeclaration */
-        try {
-/*@egen*/
-	","/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
-        } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-            jjtn000.jjtSetLastToken(getToken(0));
-          }
-        }
-/*@egen*/
-}
-
-void _LocalDeclaration() :
-{/*@bgen(jjtree) _LocalDeclaration */
-  AST_LocalDeclaration jjtn000 = new AST_LocalDeclaration(JJT_LOCALDECLARATION);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-  jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
-{/*@bgen(jjtree) _LocalDeclaration */
-        try {
-/*@egen*/
-	","/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
-        } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-            jjtn000.jjtSetLastToken(getToken(0));
-          }
-        }
-/*@egen*/
+void _Declaration()       : /* Any kind of declaration goes here */
+{}
+{
+	( LOOKAHEAD(3) _Declaration_Variable() | /* Variables  */
+      _Declaration_Function()              | /* Functions  */
+      _Declaration_Class()                 | /* Classes    */
+      _Declaration_Struct() )                /* Structures */
+	{}
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _VariableDeclaration() : 
-{/*@bgen(jjtree) _VariableDeclaration */
-  AST_VariableDeclaration jjtn000 = new AST_VariableDeclaration(JJT_VARIABLEDECLARATION);
+void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assignment>? ; */
+{/*@bgen(jjtree) _Declaration_Variable */
+        AST_Declaration_Variable jjtn000 = new AST_Declaration_Variable(JJT_DECLARATION_VARIABLE);
+        boolean jjtc000 = true;
+        jjtree.openNodeScope(jjtn000);
+        jjtn000.jjtSetFirstToken(getToken(1));
+/*@egen*/
+	GenericNode t1;
+	GenericNode t2;
+}
+{/*@bgen(jjtree) _Declaration_Variable */
+        try {
+/*@egen*/
+	t1 = _Type_Primitive() t2 = _Identifier() ( _Assignment() )? ";"/*@bgen(jjtree)*/
+        {
+          jjtree.closeNodeScope(jjtn000, true);
+          jjtc000 = false;
+          jjtn000.jjtSetLastToken(getToken(0));
+        }
+/*@egen*/ 
+	{
+		jjtn000.setVariable((Node_PrimitiveType)t1, (Node_Identifier)t2); /* Set full node data */
+	}/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtn000.jjtSetLastToken(getToken(0));
+          }
+        }
+/*@egen*/
+}
+
+void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (...) {...} */
+{/*@bgen(jjtree) _Declaration_Function */
+  AST_Declaration_Function jjtn000 = new AST_Declaration_Function(JJT_DECLARATION_FUNCTION);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
-{/*@bgen(jjtree) _VariableDeclaration */
+{/*@bgen(jjtree) _Declaration_Function */
         try {
-/*@egen*//*@bgen(jjtree)*/
+/*@egen*/
+	( _Type_Primitive() | <FN> ) <IDENTIFIER> "(" ")" _BlockUnit()/*@bgen(jjtree)*/
+        {
+          jjtree.closeNodeScope(jjtn000, true);
+          jjtc000 = false;
+          jjtn000.jjtSetLastToken(getToken(0));
+        }
+/*@egen*/
+	{}/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtn000.jjtSetLastToken(getToken(0));
+          }
+        }
+/*@egen*/
+}
+
+void _Declaration_Class() :
+{/*@bgen(jjtree) _Declaration_Class */
+  AST_Declaration_Class jjtn000 = new AST_Declaration_Class(JJT_DECLARATION_CLASS);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
+/*@egen*/}
+{/*@bgen(jjtree) _Declaration_Class */
+        try {
+/*@egen*/
+	<CLASS>/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
@@ -275,16 +327,17 @@ void _VariableDeclaration() :
 /*@egen*/
 }
 
-void _FunctionDeclaration() : 
-{/*@bgen(jjtree) _FunctionDeclaration */
-  AST_FunctionDeclaration jjtn000 = new AST_FunctionDeclaration(JJT_FUNCTIONDECLARATION);
+void _Declaration_Struct() :
+{/*@bgen(jjtree) _Declaration_Struct */
+  AST_Declaration_Struct jjtn000 = new AST_Declaration_Struct(JJT_DECLARATION_STRUCT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
-{/*@bgen(jjtree) _FunctionDeclaration */
+{/*@bgen(jjtree) _Declaration_Struct */
         try {
-/*@egen*//*@bgen(jjtree)*/
+/*@egen*/
+	<STRUCT>/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
@@ -336,6 +389,62 @@ void _Assignment() :
 /*@egen*/}
 {/*@bgen(jjtree) _Assignment */
         try {
+/*@egen*/
+	"="/*@bgen(jjtree)*/
+        {
+          jjtree.closeNodeScope(jjtn000, true);
+          jjtc000 = false;
+          jjtn000.jjtSetLastToken(getToken(0));
+        }
+/*@egen*/
+	{}/*@bgen(jjtree)*/
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtn000.jjtSetLastToken(getToken(0));
+          }
+        }
+/*@egen*/
+}
+
+GenericNode _Identifier() : /* An identifier. (variable/function name for example) */
+{/*@bgen(jjtree) _Identifier */
+  AST_Identifier jjtn000 = new AST_Identifier(JJT_IDENTIFIER);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
+/*@egen*/ Token t; }
+{/*@bgen(jjtree) _Identifier */
+        try {
+/*@egen*/
+	t = <IDENTIFIER>/*@bgen(jjtree)*/
+        {
+          jjtree.closeNodeScope(jjtn000, true);
+          jjtc000 = false;
+          jjtn000.jjtSetLastToken(getToken(0));
+        }
+/*@egen*/
+	{ 
+		return jjtn000.setIdentifier(t.image);
+	}/*@bgen(jjtree)*/
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtn000.jjtSetLastToken(getToken(0));
+          }
+        }
+/*@egen*/
+}
+
+void _Literal() :
+{/*@bgen(jjtree) _Literal */
+  AST_Literal jjtn000 = new AST_Literal(JJT_LITERAL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
+/*@egen*/}
+{/*@bgen(jjtree) _Literal */
+        try {
 /*@egen*//*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
@@ -353,14 +462,29 @@ void _Assignment() :
 /*@egen*/
 }
 
-void _LabeledStatement() :
-{/*@bgen(jjtree) _LabeledStatement */
-  AST_LabeledStatement jjtn000 = new AST_LabeledStatement(JJT_LABELEDSTATEMENT);
+/**--------------------------------------**/
+/** Lower level *specialised* constructs **/
+/**--------------------------------------**/
+
+/**----------**/
+/** Literals **/
+/**----------**/
+
+/**-------------**/
+/** Expressions **/
+/**-------------**/
+
+/**------------**/
+/** Statements **/
+/**------------**/
+void _Statement_Labeled() :
+{/*@bgen(jjtree) _Statement_Labeled */
+  AST_Statement_Labeled jjtn000 = new AST_Statement_Labeled(JJT_STATEMENT_LABELED);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
-{/*@bgen(jjtree) _LabeledStatement */
+{/*@bgen(jjtree) _Statement_Labeled */
         try {
 /*@egen*/
 	<IDENTIFIER> ":" _Statement()/*@bgen(jjtree)*/
@@ -394,49 +518,30 @@ void _LabeledStatement() :
 /*@egen*/
 }
 
-void _Id() :
-{/*@bgen(jjtree) _Id */
-  AST_Id jjtn000 = new AST_Id(JJT_ID);
+/**-------**/
+/** Types **/
+/**-------**/
+GenericNode _Type_Primitive() : /* All primitive data types are declared here */
+{/*@bgen(jjtree) _Type_Primitive */
+  AST_Type_Primitive jjtn000 = new AST_Type_Primitive(JJT_TYPE_PRIMITIVE);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
-{/*@bgen(jjtree) _Id */
+/*@egen*/ Token t; }
+{/*@bgen(jjtree) _Type_Primitive */
         try {
-/*@egen*//*@bgen(jjtree)*/
+/*@egen*/
+	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>    |
+	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>    |
+	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>   |
+	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>)/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
           jjtn000.jjtSetLastToken(getToken(0));
         }
 /*@egen*/
-	{}/*@bgen(jjtree)*/
-        } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-            jjtn000.jjtSetLastToken(getToken(0));
-          }
-        }
-/*@egen*/
-}
-
-void _Literal() :
-{/*@bgen(jjtree) _Literal */
-  AST_Literal jjtn000 = new AST_Literal(JJT_LITERAL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-  jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
-{/*@bgen(jjtree) _Literal */
-        try {
-/*@egen*//*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
+	{ return jjtn000.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);

@@ -20,7 +20,7 @@ options {
     SANITY_CHECK           = true;
     FORCE_LA_CHECK         = false;
     MULTI                  = true;
-    NODE_EXTENDS           = "CustomNode";
+    NODE_EXTENDS           = "NodeSetter";
     TRACK_TOKENS           = true;
 }
 
@@ -28,6 +28,8 @@ PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
 package com.parser;
 
 import org.javacc.jjtree.JJTree;
+import com.parser.nodes.*;
+import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
 
 public class ScriptlangParser {
     /** Get the root node of the AST **/
@@ -55,7 +57,7 @@ TOKEN :
 	<LBRACE: "{">
 |	<RBRACE: "}">
 
-	/* Primitive data types */
+	/* Primitive data types. IMPORTANT: DO NOT CHANGE THE DECLARATION ORDER */
 |	<U8:    "u8"   >
 |	<U16:   "u16"  >
 |	<U32:   "u32"  >
@@ -71,9 +73,15 @@ TOKEN :
 |	<USIZE: "usize">
 |	<ISIZE: "isize">
 |	<AUTO:  "auto" >
+|   <ARRAY: "array">
 
 	/* Literals */
 |	<INT_LITERAL: (<DIGIT>)+>
+
+	/* Keywords */
+|	<FN: "fn">         /* Return type void for function declaration */
+|	<CLASS: "class">   /* Class declaration                         */
+|	<STRUCT: "struct"> /* Struct declaration                        */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)*>
@@ -93,7 +101,7 @@ void _Root() :
 void _All() #void : /* Matches any kind of top level construct               */
 {}                  /* (blocks ({}), statements and any kind of declaration) */
 {
-	_BlockUnit() | _Statement() | _GlobalDeclaration()
+	_BlockUnit() | _Statement() | _Declaration()
 }
 
 /**-------------------------**/
@@ -112,32 +120,49 @@ void _Statement() :
 	{}
 }
 
-void _GlobalDeclaration() :
+void _Declaration() #void : /* Any kind of declaration goes here */
 {}
 {
-	","
-	{}
-}
-
-void _LocalDeclaration() :
-{}
-{
-	","
+	( LOOKAHEAD(3) _Declaration_Variable() | /* Variables  */
+      _Declaration_Function()              | /* Functions  */
+      _Declaration_Class()                 | /* Classes    */
+      _Declaration_Struct() )                /* Structures */
 	{}
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _VariableDeclaration() : 
+void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assignment>? ; */
+{
+	GenericNode t1;
+	GenericNode t2;
+}
+{
+	t1 = _Type_Primitive() t2 = _Identifier() ( _Assignment() )? ";" 
+	{
+		jjtThis.setVariable((Node_PrimitiveType)t1, (Node_Identifier)t2); /* Set full node data */
+	}
+}
+
+void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (...) {...} */
 {}
 {
+	( _Type_Primitive() | <FN> ) <IDENTIFIER> "(" ")" _BlockUnit()
 	{}
 }
 
-void _FunctionDeclaration() : 
+void _Declaration_Class() :
 {}
 {
+	<CLASS>
+	{}
+}
+
+void _Declaration_Struct() :
+{}
+{
+	<STRUCT>
 	{}
 }
 
@@ -150,20 +175,17 @@ void _Expression() :
 void _Assignment() : 
 {}
 {
+	"="
 	{}
 }
 
-void _LabeledStatement() :
-{}
+GenericNode _Identifier() : /* An identifier. (variable/function name for example) */
+{ Token t; }
 {
-	<IDENTIFIER> ":" _Statement()
-	{}
-}
-
-void _Id() :
-{}
-{
-	{}
+	t = <IDENTIFIER>
+	{ 
+		return jjtThis.setIdentifier(t.image);
+	}
 }
 
 void _Literal() :
@@ -187,3 +209,22 @@ void _Literal() :
 /**------------**/
 /** Statements **/
 /**------------**/
+void _Statement_Labeled() :
+{}
+{
+	<IDENTIFIER> ":" _Statement()
+	{}
+}
+
+/**-------**/
+/** Types **/
+/**-------**/
+GenericNode _Type_Primitive() : /* All primitive data types are declared here */
+{ Token t; }
+{
+	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>    |
+	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>    |
+	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>   |
+	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>)
+	{ return jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }
+}

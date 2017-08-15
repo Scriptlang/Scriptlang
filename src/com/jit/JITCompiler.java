@@ -5,7 +5,7 @@ import com.parser.AST_Root;
 
 public class JITCompiler {
 	
-	public static void JITCompile(AST_Root root) {
+	public static void compile(AST_Root root) {
 		Dbg.log("  2.1: Lowering from AST to Intermediate DAG representation  | Form: AST -> DAG");
 		Dbg.log("  2.2: Legalizing DAGs | Form: Not legalized Intermediate DAG -> Legalized Intermediate DAG");
 		Dbg.log("  2.3: Selecting commands | Form: Intermediate DAG -> Native DAG");

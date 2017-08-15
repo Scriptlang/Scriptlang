@@ -7,15 +7,16 @@ public interface ScriptlangParserTreeConstants
   public int JJTVOID = 1;
   public int JJT_BLOCKUNIT = 2;
   public int JJT_STATEMENT = 3;
-  public int JJT_GLOBALDECLARATION = 4;
-  public int JJT_LOCALDECLARATION = 5;
-  public int JJT_VARIABLEDECLARATION = 6;
-  public int JJT_FUNCTIONDECLARATION = 7;
+  public int JJT_DECLARATION_VARIABLE = 4;
+  public int JJT_DECLARATION_FUNCTION = 5;
+  public int JJT_DECLARATION_CLASS = 6;
+  public int JJT_DECLARATION_STRUCT = 7;
   public int JJT_EXPRESSION = 8;
   public int JJT_ASSIGNMENT = 9;
-  public int JJT_LABELEDSTATEMENT = 10;
-  public int JJT_ID = 11;
-  public int JJT_LITERAL = 12;
+  public int JJT_IDENTIFIER = 10;
+  public int JJT_LITERAL = 11;
+  public int JJT_STATEMENT_LABELED = 12;
+  public int JJT_TYPE_PRIMITIVE = 13;
 
 
   public String[] jjtNodeName = {
@@ -23,15 +24,16 @@ public interface ScriptlangParserTreeConstants
     "void",
     "_BlockUnit",
     "_Statement",
-    "_GlobalDeclaration",
-    "_LocalDeclaration",
-    "_VariableDeclaration",
-    "_FunctionDeclaration",
+    "_Declaration_Variable",
+    "_Declaration_Function",
+    "_Declaration_Class",
+    "_Declaration_Struct",
     "_Expression",
     "_Assignment",
-    "_LabeledStatement",
-    "_Id",
+    "_Identifier",
     "_Literal",
+    "_Statement_Labeled",
+    "_Type_Primitive",
   };
 }
-/* JavaCC - OriginalChecksum=e6e8d43fcfea8c46f4532773938ece09 (do not edit this line) */
+/* JavaCC - OriginalChecksum=e4b2a3f6739327dd65e523f7c8c0a616 (do not edit this line) */

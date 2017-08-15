@@ -46,13 +46,21 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int AUTO = 21;
   /** RegularExpression Id. */
-  int INT_LITERAL = 22;
+  int ARRAY = 22;
   /** RegularExpression Id. */
-  int IDENTIFIER = 23;
+  int INT_LITERAL = 23;
   /** RegularExpression Id. */
-  int LETTER = 24;
+  int FN = 24;
   /** RegularExpression Id. */
-  int DIGIT = 25;
+  int CLASS = 25;
+  /** RegularExpression Id. */
+  int STRUCT = 26;
+  /** RegularExpression Id. */
+  int IDENTIFIER = 27;
+  /** RegularExpression Id. */
+  int LETTER = 28;
+  /** RegularExpression Id. */
+  int DIGIT = 29;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -81,12 +89,18 @@ public interface ScriptlangParserConstants {
     "\"usize\"",
     "\"isize\"",
     "\"auto\"",
+    "\"array\"",
     "<INT_LITERAL>",
+    "\"fn\"",
+    "\"class\"",
+    "\"struct\"",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT>",
     "\";\"",
-    "\",\"",
+    "\"(\"",
+    "\")\"",
+    "\"=\"",
     "\":\"",
   };
 

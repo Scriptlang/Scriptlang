@@ -35,6 +35,8 @@ bool v;
 char v;
 usize v;
 isize v;
+auto v;
+array v;
 
 /* We may declare new datatypes like this: */
 typedef i32 int;
@@ -109,7 +111,7 @@ if(v == 20) {
 	statement2();
 }
 
-auto v2 = if(v == 30) 10 else 20; /* Infers datatype u8                                                                         */
+auto v2 = if(v == 30) 10 else 20; /* Infers datatype u8 */
 auto v3 = if(v == 40) 30;         /* Infers two possible datatypes. u8 if v == 30 and () if v != 30. 
                                      This is NOT VALID and an error will be issued */ 
 

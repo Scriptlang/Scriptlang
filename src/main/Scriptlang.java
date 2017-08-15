@@ -35,7 +35,7 @@ public class Scriptlang {
 
 		/* JIT Compile parsed file (compiles into the target and executes the result) */
 		Dbg.log("2: JIT Compiling and running '"+ args[0] +"'...");
-		JITCompiler.JITCompile(((AST_Root)parser.rootNode()));
+		JITCompiler.compile(((AST_Root)parser.rootNode()));
 		
 		/* All done */
 		Dbg.log("3: Done parsing and interpreting '"+ args[0] +"'.");
