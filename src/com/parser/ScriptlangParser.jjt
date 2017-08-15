@@ -134,15 +134,10 @@ void _Declaration() #void : /* Any kind of declaration goes here */
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
 void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assignment>? ; */
+{}
 {
-	GenericNode t1;
-	GenericNode t2;
-}
-{
-	t1 = _Type_Primitive() t2 = _Identifier() ( _Assignment() )? ";" 
-	{
-		jjtThis.setVariable((Node_PrimitiveType)t1, (Node_Identifier)t2); /* Set full node data */
-	}
+	_Type_Primitive() _Identifier() ( _Assignment() )? ";" 
+	{}
 }
 
 void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (...) {...} */
@@ -179,12 +174,12 @@ void _Assignment() :
 	{}
 }
 
-GenericNode _Identifier() : /* An identifier. (variable/function name for example) */
+void _Identifier() : /* An identifier. (variable/function name for example) */
 { Token t; }
 {
 	t = <IDENTIFIER>
-	{ 
-		return jjtThis.setIdentifier(t.image);
+	{
+		jjtThis.setIdentifier(t.image);
 	}
 }
 
@@ -212,19 +207,19 @@ void _Literal() :
 void _Statement_Labeled() :
 {}
 {
-	<IDENTIFIER> ":" _Statement()
+	_Identifier() ":" _Statement()
 	{}
 }
 
 /**-------**/
 /** Types **/
 /**-------**/
-GenericNode _Type_Primitive() : /* All primitive data types are declared here */
+void _Type_Primitive() : /* All primitive data types are declared here */
 { Token t; }
 {
 	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>    |
 	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>    |
 	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>   |
 	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>)
-	{ return jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }
+	{ jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }
 }

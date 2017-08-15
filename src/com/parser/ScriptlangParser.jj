@@ -215,27 +215,22 @@ void _Declaration()       : /* Any kind of declaration goes here */
 /**----------------------------------**/
 void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assignment>? ; */
 {/*@bgen(jjtree) _Declaration_Variable */
-        AST_Declaration_Variable jjtn000 = new AST_Declaration_Variable(JJT_DECLARATION_VARIABLE);
-        boolean jjtc000 = true;
-        jjtree.openNodeScope(jjtn000);
-        jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/
-	GenericNode t1;
-	GenericNode t2;
-}
+  AST_Declaration_Variable jjtn000 = new AST_Declaration_Variable(JJT_DECLARATION_VARIABLE);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
+/*@egen*/}
 {/*@bgen(jjtree) _Declaration_Variable */
         try {
 /*@egen*/
-	t1 = _Type_Primitive() t2 = _Identifier() ( _Assignment() )? ";"/*@bgen(jjtree)*/
+	_Type_Primitive() _Identifier() ( _Assignment() )? ";"/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
           jjtn000.jjtSetLastToken(getToken(0));
         }
 /*@egen*/ 
-	{
-		jjtn000.setVariable((Node_PrimitiveType)t1, (Node_Identifier)t2); /* Set full node data */
-	}/*@bgen(jjtree)*/
+	{}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -407,7 +402,7 @@ void _Assignment() :
 /*@egen*/
 }
 
-GenericNode _Identifier() : /* An identifier. (variable/function name for example) */
+void _Identifier() : /* An identifier. (variable/function name for example) */
 {/*@bgen(jjtree) _Identifier */
   AST_Identifier jjtn000 = new AST_Identifier(JJT_IDENTIFIER);
   boolean jjtc000 = true;
@@ -424,8 +419,8 @@ GenericNode _Identifier() : /* An identifier. (variable/function name for exampl
           jjtn000.jjtSetLastToken(getToken(0));
         }
 /*@egen*/
-	{ 
-		return jjtn000.setIdentifier(t.image);
+	{
+		jjtn000.setIdentifier(t.image);
 	}/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
@@ -487,7 +482,7 @@ void _Statement_Labeled() :
 {/*@bgen(jjtree) _Statement_Labeled */
         try {
 /*@egen*/
-	<IDENTIFIER> ":" _Statement()/*@bgen(jjtree)*/
+	_Identifier() ":" _Statement()/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
@@ -521,7 +516,7 @@ void _Statement_Labeled() :
 /**-------**/
 /** Types **/
 /**-------**/
-GenericNode _Type_Primitive() : /* All primitive data types are declared here */
+void _Type_Primitive() : /* All primitive data types are declared here */
 {/*@bgen(jjtree) _Type_Primitive */
   AST_Type_Primitive jjtn000 = new AST_Type_Primitive(JJT_TYPE_PRIMITIVE);
   boolean jjtc000 = true;
@@ -541,7 +536,7 @@ GenericNode _Type_Primitive() : /* All primitive data types are declared here */
           jjtn000.jjtSetLastToken(getToken(0));
         }
 /*@egen*/
-	{ return jjtn000.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }/*@bgen(jjtree)*/
+	{ jjtn000.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);

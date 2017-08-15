@@ -1,10 +1,7 @@
 package com.parser;
 
-import com.parser.nodes.GenericNode;
-import com.parser.nodes.Node_PrimitiveType;
+import com.parser.nodes.*;
 import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
-import com.parser.nodes.Node_DeclVariable;
-import com.parser.nodes.Node_Identifier;
 
 public class NodeSetter {
 	
@@ -20,13 +17,7 @@ public class NodeSetter {
 	GenericNode setThisNode(GenericNode node) {
 		return setThisNode(node, "(null)");
 	}
-	
-	public GenericNode setVariable(Node_PrimitiveType nodePrimitiveType, Node_Identifier nodeIdentifier) {
-		setThisNode(new Node_DeclVariable());
-		((Node_DeclVariable)thisNode).set(nodePrimitiveType, nodeIdentifier);
-		return thisNode;
-	}
-	
+		
 	public GenericNode setPrimitiveType(String name, PrimitiveType type) {
 		setThisNode(new Node_PrimitiveType(), name);
 		((Node_PrimitiveType)thisNode).set(type);
