@@ -739,7 +739,7 @@ void _Expression_Equal()       : {}
 
 void _Expression_Relational()       : {}
 {
-	_Expression_Additive() 
+	_Expression_Shift() 
 	( "<"/*@bgen(jjtree) #_Expression(true) */
                {
                  AST_Expression jjtn001 = new AST_Expression(JJT_EXPRESSION);
@@ -748,7 +748,7 @@ void _Expression_Relational()       : {}
                  jjtn001.jjtSetFirstToken(getToken(1));
                }
                try {
-/*@egen*/  _Expression_Additive()/*@bgen(jjtree)*/
+/*@egen*/  _Expression_Shift()/*@bgen(jjtree)*/
                } catch (Throwable jjte001) {
                  if (jjtc001) {
                    jjtree.clearNodeScope(jjtn001);
@@ -778,7 +778,7 @@ void _Expression_Relational()       : {}
                  jjtn002.jjtSetFirstToken(getToken(1));
                }
                try {
-/*@egen*/  _Expression_Additive()/*@bgen(jjtree)*/
+/*@egen*/  _Expression_Shift()/*@bgen(jjtree)*/
                } catch (Throwable jjte002) {
                  if (jjtc002) {
                    jjtree.clearNodeScope(jjtn002);
@@ -808,7 +808,7 @@ void _Expression_Relational()       : {}
                  jjtn003.jjtSetFirstToken(getToken(1));
                }
                try {
-/*@egen*/ _Expression_Additive()/*@bgen(jjtree)*/
+/*@egen*/ _Expression_Shift()/*@bgen(jjtree)*/
                } catch (Throwable jjte003) {
                  if (jjtc003) {
                    jjtree.clearNodeScope(jjtn003);
@@ -838,7 +838,7 @@ void _Expression_Relational()       : {}
                  jjtn004.jjtSetFirstToken(getToken(1));
                }
                try {
-/*@egen*/ _Expression_Additive()/*@bgen(jjtree)*/
+/*@egen*/ _Expression_Shift()/*@bgen(jjtree)*/
                } catch (Throwable jjte004) {
                  if (jjtc004) {
                    jjtree.clearNodeScope(jjtn004);
@@ -860,6 +860,71 @@ void _Expression_Relational()       : {}
                  }
                }
 /*@egen*/                { jjtn004.setExpr(">=", ExpressionType.REL); } )*
+}
+
+void _Expression_Shift()       : {}
+{
+	_Expression_Additive() 
+	( "<<"/*@bgen(jjtree) #_Expression(true) */
+                {
+                  AST_Expression jjtn001 = new AST_Expression(JJT_EXPRESSION);
+                  boolean jjtc001 = true;
+                  jjtree.openNodeScope(jjtn001);
+                  jjtn001.jjtSetFirstToken(getToken(1));
+                }
+                try {
+/*@egen*/  _Expression_Additive()/*@bgen(jjtree)*/
+                } catch (Throwable jjte001) {
+                  if (jjtc001) {
+                    jjtree.clearNodeScope(jjtn001);
+                    jjtc001 = false;
+                  } else {
+                    jjtree.popNode();
+                  }
+                  if (jjte001 instanceof RuntimeException) {
+                    throw (RuntimeException)jjte001;
+                  }
+                  if (jjte001 instanceof ParseException) {
+                    throw (ParseException)jjte001;
+                  }
+                  throw (Error)jjte001;
+                } finally {
+                  if (jjtc001) {
+                    jjtree.closeNodeScope(jjtn001, true);
+                    jjtn001.jjtSetLastToken(getToken(0));
+                  }
+                }
+/*@egen*/                { jjtn001.setExpr("<<",  ExpressionType.SHT); } | 
+	  ">>"/*@bgen(jjtree) #_Expression(true) */
+                {
+                  AST_Expression jjtn002 = new AST_Expression(JJT_EXPRESSION);
+                  boolean jjtc002 = true;
+                  jjtree.openNodeScope(jjtn002);
+                  jjtn002.jjtSetFirstToken(getToken(1));
+                }
+                try {
+/*@egen*/  _Expression_Additive()/*@bgen(jjtree)*/
+                } catch (Throwable jjte002) {
+                  if (jjtc002) {
+                    jjtree.clearNodeScope(jjtn002);
+                    jjtc002 = false;
+                  } else {
+                    jjtree.popNode();
+                  }
+                  if (jjte002 instanceof RuntimeException) {
+                    throw (RuntimeException)jjte002;
+                  }
+                  if (jjte002 instanceof ParseException) {
+                    throw (ParseException)jjte002;
+                  }
+                  throw (Error)jjte002;
+                } finally {
+                  if (jjtc002) {
+                    jjtree.closeNodeScope(jjtn002, true);
+                    jjtn002.jjtSetLastToken(getToken(0));
+                  }
+                }
+/*@egen*/                { jjtn002.setExpr(">>",  ExpressionType.SHT); } )*
 }
 
 void _Expression_Additive()       : {}
@@ -929,7 +994,7 @@ void _Expression_Additive()       : {}
 
 void _Expression_Multiplicative()       : {}
 {
-	_Expression_Unary()
+	_Expression_Cast()
 	( "*"/*@bgen(jjtree) #_Expression(true) */
               {
                 AST_Expression jjtn001 = new AST_Expression(JJT_EXPRESSION);
@@ -938,7 +1003,7 @@ void _Expression_Multiplicative()       : {}
                 jjtn001.jjtSetFirstToken(getToken(1));
               }
               try {
-/*@egen*/ _Expression_Unary()/*@bgen(jjtree)*/
+/*@egen*/ _Expression_Cast()/*@bgen(jjtree)*/
               } catch (Throwable jjte001) {
                 if (jjtc001) {
                   jjtree.clearNodeScope(jjtn001);
@@ -968,7 +1033,7 @@ void _Expression_Multiplicative()       : {}
             jjtn002.jjtSetFirstToken(getToken(1));
           }
           try {
-/*@egen*/ _Expression_Unary()/*@bgen(jjtree)*/
+/*@egen*/ _Expression_Cast()/*@bgen(jjtree)*/
           } catch (Throwable jjte002) {
             if (jjtc002) {
               jjtree.clearNodeScope(jjtn002);
@@ -998,7 +1063,7 @@ void _Expression_Multiplicative()       : {}
                 jjtn003.jjtSetFirstToken(getToken(1));
               }
               try {
-/*@egen*/ _Expression_Unary()/*@bgen(jjtree)*/
+/*@egen*/ _Expression_Cast()/*@bgen(jjtree)*/
               } catch (Throwable jjte003) {
                 if (jjtc003) {
                   jjtree.clearNodeScope(jjtn003);
@@ -1020,6 +1085,45 @@ void _Expression_Multiplicative()       : {}
                 }
               }
 /*@egen*/                { jjtn003.setExpr("%",  ExpressionType.MUL); } )*
+}
+
+void _Expression_Cast()       :
+{ Token t; }
+{
+	LOOKAHEAD(2) "(" t = _Type_Suffix() ")"/*@bgen(jjtree) #_Expression(true) */
+                                                {
+                                                  AST_Expression jjtn001 = new AST_Expression(JJT_EXPRESSION);
+                                                  boolean jjtc001 = true;
+                                                  jjtree.openNodeScope(jjtn001);
+                                                  jjtn001.jjtSetFirstToken(getToken(1));
+                                                }
+                                                try {
+/*@egen*/ _Expression_Unary()/*@bgen(jjtree)*/
+                                                } catch (Throwable jjte001) {
+                                                  if (jjtc001) {
+                                                    jjtree.clearNodeScope(jjtn001);
+                                                    jjtc001 = false;
+                                                  } else {
+                                                    jjtree.popNode();
+                                                  }
+                                                  if (jjte001 instanceof RuntimeException) {
+                                                    throw (RuntimeException)jjte001;
+                                                  }
+                                                  if (jjte001 instanceof ParseException) {
+                                                    throw (ParseException)jjte001;
+                                                  }
+                                                  throw (Error)jjte001;
+                                                } finally {
+                                                  if (jjtc001) {
+                                                    jjtree.closeNodeScope(jjtn001, true);
+                                                    jjtn001.jjtSetLastToken(getToken(0));
+                                                  }
+                                                }
+/*@egen*/               
+	{
+		jjtn001.setExpr("(" + t.image + ")",  ExpressionType.CAST);
+	}
+|	_Expression_Unary()
 }
 
 void _Expression_Unary()       : {}
@@ -1153,7 +1257,9 @@ void _Type_Primitive() : /* All primitive data types are declared here */
           jjtn000.jjtSetLastToken(getToken(0));
         }
 /*@egen*/
-	{ jjtn000.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }/*@bgen(jjtree)*/
+	{
+		jjtn000.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]);
+	}/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -1161,4 +1267,17 @@ void _Type_Primitive() : /* All primitive data types are declared here */
           }
         }
 /*@egen*/
+}
+
+Token _Type_Suffix()       : /* Supported data type suffixes */
+{ Token t; }
+{
+	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>   |
+	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>   |
+	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>  |
+	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY> |
+	  t=<LITERAL_SUFFIX> )
+	{
+		return t;
+	}
 }

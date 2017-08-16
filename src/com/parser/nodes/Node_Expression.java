@@ -11,10 +11,11 @@ public class Node_Expression extends GenericNode {
 		AND,     /* &            */
 		EQUAL,   /* == , !=      */
 		REL,     /* <, >, <=, >= */
+		SHT,     /* <<, >>       */
 		ADD,     /* + , -        */
 		MUL,     /* * , / , %    */
-		UNARY,   /* ~ , !        */
-		PRIMARY  /* <literal> , <identifier> , <expression> */
+		CAST,    /* (<type>)     */
+		UNARY    /* ~ , !        */
 	}
 	
 	ExpressionType type = ExpressionType.NULL;

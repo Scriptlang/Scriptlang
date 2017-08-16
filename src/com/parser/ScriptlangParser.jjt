@@ -248,11 +248,18 @@ void _Expression_Equal() #void : {}
 
 void _Expression_Relational() #void : {}
 {
+	_Expression_Shift() 
+	( "<"  _Expression_Shift() #_Expression() { jjtn001.setExpr("<",  ExpressionType.REL); } | 
+	  ">"  _Expression_Shift() #_Expression() { jjtn002.setExpr(">",  ExpressionType.REL); } | 
+	  "<=" _Expression_Shift() #_Expression() { jjtn003.setExpr("<=", ExpressionType.REL); } | 
+	  ">=" _Expression_Shift() #_Expression() { jjtn004.setExpr(">=", ExpressionType.REL); } )*
+}
+
+void _Expression_Shift() #void : {}
+{
 	_Expression_Additive() 
-	( "<"  _Expression_Additive() #_Expression() { jjtn001.setExpr("<",  ExpressionType.REL); } | 
-	  ">"  _Expression_Additive() #_Expression() { jjtn002.setExpr(">",  ExpressionType.REL); } | 
-	  "<=" _Expression_Additive() #_Expression() { jjtn003.setExpr("<=", ExpressionType.REL); } | 
-	  ">=" _Expression_Additive() #_Expression() { jjtn004.setExpr(">=", ExpressionType.REL); } )*
+	( "<<"  _Expression_Additive() #_Expression() { jjtn001.setExpr("<<",  ExpressionType.SHT); } | 
+	  ">>"  _Expression_Additive() #_Expression() { jjtn002.setExpr(">>",  ExpressionType.SHT); } )*
 }
 
 void _Expression_Additive() #void : {}
@@ -264,10 +271,20 @@ void _Expression_Additive() #void : {}
 
 void _Expression_Multiplicative() #void : {}
 {
-	_Expression_Unary()
-	( "*" _Expression_Unary() #_Expression() { jjtn001.setExpr("*",  ExpressionType.MUL); } |
-      "/" _Expression_Unary() #_Expression() { jjtn002.setExpr("/",  ExpressionType.MUL); } |
-	  "%" _Expression_Unary() #_Expression() { jjtn003.setExpr("%",  ExpressionType.MUL); } )*
+	_Expression_Cast()
+	( "*" _Expression_Cast() #_Expression() { jjtn001.setExpr("*",  ExpressionType.MUL); } |
+      "/" _Expression_Cast() #_Expression() { jjtn002.setExpr("/",  ExpressionType.MUL); } |
+	  "%" _Expression_Cast() #_Expression() { jjtn003.setExpr("%",  ExpressionType.MUL); } )*
+}
+
+void _Expression_Cast() #void :
+{ Token t; }
+{
+	LOOKAHEAD(2) "(" t = _Type_Suffix() ")" _Expression_Unary() #_Expression()
+	{
+		jjtn001.setExpr("(" + t.image + ")",  ExpressionType.CAST);
+	}
+|	_Expression_Unary()
 }
 
 void _Expression_Unary() #void : {}
@@ -302,5 +319,20 @@ void _Type_Primitive() : /* All primitive data types are declared here */
 	t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>  |
 	t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR> |
 	t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>
-	{ jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]); }
+	{
+		jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]);
+	}
+}
+
+Token _Type_Suffix() #void : /* Supported data type suffixes */
+{ Token t; }
+{
+	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>   |
+	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>   |
+	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>  |
+	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY> |
+	  t=<LITERAL_SUFFIX> )
+	{
+		return t;
+	}
 }
