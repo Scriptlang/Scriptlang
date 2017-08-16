@@ -11,12 +11,13 @@ public interface ScriptlangParserTreeConstants
   public int JJT_DECLARATION_FUNCTION = 5;
   public int JJT_DECLARATION_CLASS = 6;
   public int JJT_DECLARATION_STRUCT = 7;
-  public int JJT_EXPRESSION = 8;
+  public int JJT_DECLARATION_ENUM = 8;
   public int JJT_ASSIGNMENT = 9;
   public int JJT_IDENTIFIER = 10;
   public int JJT_LITERAL = 11;
-  public int JJT_STATEMENT_LABELED = 12;
-  public int JJT_TYPE_PRIMITIVE = 13;
+  public int JJT_EXPRESSION = 12;
+  public int JJT_STATEMENT_LABELED = 13;
+  public int JJT_TYPE_PRIMITIVE = 14;
 
 
   public String[] jjtNodeName = {
@@ -28,12 +29,13 @@ public interface ScriptlangParserTreeConstants
     "_Declaration_Function",
     "_Declaration_Class",
     "_Declaration_Struct",
-    "_Expression",
+    "_Declaration_Enum",
     "_Assignment",
     "_Identifier",
     "_Literal",
+    "_Expression",
     "_Statement_Labeled",
     "_Type_Primitive",
   };
 }
-/* JavaCC - OriginalChecksum=e4b2a3f6739327dd65e523f7c8c0a616 (do not edit this line) */
+/* JavaCC - OriginalChecksum=4bda4defb9d8a25bd09b9ac22368a265 (do not edit this line) */

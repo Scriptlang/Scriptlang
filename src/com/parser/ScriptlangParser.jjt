@@ -86,9 +86,10 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<LITERAL_BOOL: ("true" | "false")>
 
 	/* Keywords */
-|	<FN: "fn">         /* Return type void for function declaration */
-|	<CLASS: "class">   /* Class declaration                         */
+|	<FN:     "fn"    > /* Return type void for function declaration */
+|	<CLASS:  "class" > /* Class declaration                         */
 |	<STRUCT: "struct"> /* Struct declaration                        */
+|	<ENUM:   "enum"  > /* Enum declaration                          */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -131,10 +132,11 @@ void _Statement() :
 void _Declaration() #void : /* Any kind of declaration goes here */
 {}
 {
-	LOOKAHEAD(3) _Declaration_Variable() | /* Variables  */
-	_Declaration_Function()              | /* Functions  */
-	_Declaration_Class()                 | /* Classes    */
-	_Declaration_Struct()                  /* Structures */
+	LOOKAHEAD(3) _Declaration_Variable() | /* Variables   */
+	_Declaration_Function()              | /* Functions   */
+	_Declaration_Class()                 | /* Classes     */
+	_Declaration_Struct()                | /* Structures  */
+	_Declaration_Enum()                    /* Enumerators */
 }
 
 /**----------------------------------**/
@@ -164,9 +166,17 @@ void _Declaration_Struct() :
 	{}
 }
 
-void _Expression() : {}
+void _Declaration_Enum() :
+{}
 {
-	LOOKAHEAD(3) _Expression_Primary() _Assignment() | _Expression_CondOr(jjtThis)
+	<ENUM>
+	{}
+}
+
+void _Expression() #void : {}
+{
+	LOOKAHEAD(3) _Expression_CondOr() |
+	_Expression_Primary() _Assignment()
 }
 
 void _Assignment() : {} /* Assignment: <prim_expr>? = <expr> */
@@ -204,66 +214,66 @@ void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean,
 /**-------------**/
 /** Expressions **/
 /**-------------**/
-void _Expression_CondOr(SimpleNode n) #void : {}
+void _Expression_CondOr() #void : {}
 {
-	_Expression_CondAnd(n) ( "||" _Expression_CondAnd(n) { n.setExpr("||", ExpressionType.CONDOR); } )*
+	_Expression_CondAnd() ( "||" _Expression_CondAnd() #_Expression() { jjtn001.setExpr("||", ExpressionType.CONDOR); } )*
 }
 
-void _Expression_CondAnd(SimpleNode n) #void : {}
+void _Expression_CondAnd() #void : {}
 {
-	_Expression_IncOr(n) ( "&&" _Expression_IncOr(n) { n.setExpr("&&", ExpressionType.CONDAND); } )*
+	_Expression_IncOr() ( "&&" _Expression_IncOr() #_Expression() { jjtn001.setExpr("&&", ExpressionType.CONDAND); } )*
 }
 
-void _Expression_IncOr(SimpleNode n) #void : {}
+void _Expression_IncOr() #void : {}
 {
-	_Expression_ExOr(n) ( "|" _Expression_ExOr(n) { n.setExpr("|", ExpressionType.INCOR); } )*
+	_Expression_ExOr() ( "|" _Expression_ExOr() #_Expression() { jjtn001.setExpr("|", ExpressionType.INCOR); } )*
 }
 
-void _Expression_ExOr(SimpleNode n) #void : {}
+void _Expression_ExOr() #void : {}
 {
-	_Expression_And(n) ( "^" _Expression_And(n) { n.setExpr("^", ExpressionType.EXOR); } )*
+	_Expression_And() ( "^" _Expression_And() #_Expression() { jjtn001.setExpr("^", ExpressionType.EXOR); } )*
 }
 
-void _Expression_And(SimpleNode n) #void : {}
+void _Expression_And() #void : {}
 {
-	_Expression_Equal(n) ( "&" _Expression_Equal(n) { n.setExpr("&", ExpressionType.AND); } )*
+	_Expression_Equal() ( "&" _Expression_Equal() #_Expression() { jjtn001.setExpr("&", ExpressionType.AND); } )*
 }
 
-void _Expression_Equal(SimpleNode n) #void : {}
+void _Expression_Equal() #void : {}
 {
-	_Expression_Relational(n)
-	( "==" _Expression_Relational(n) { n.setExpr("==", ExpressionType.EQUAL); } |
-      "!=" _Expression_Relational(n) { n.setExpr("!=", ExpressionType.EQUAL); } )*
+	_Expression_Relational()
+	( "==" _Expression_Relational() #_Expression() { jjtn001.setExpr("==", ExpressionType.EQUAL); } |
+      "!=" _Expression_Relational() #_Expression() { jjtn002.setExpr("!=", ExpressionType.EQUAL); } )*
 }
 
-void _Expression_Relational(SimpleNode n) #void : {}
+void _Expression_Relational() #void : {}
 {
-	_Expression_Additive(n) 
-	( "<"  _Expression_Additive(n) { n.setExpr("<",  ExpressionType.REL); } | 
-	  ">"  _Expression_Additive(n) { n.setExpr(">",  ExpressionType.REL); } | 
-	  "<=" _Expression_Additive(n) { n.setExpr("<=", ExpressionType.REL); } | 
-	  ">=" _Expression_Additive(n) { n.setExpr(">=", ExpressionType.REL); } )*
+	_Expression_Additive() 
+	( "<"  _Expression_Additive() #_Expression() { jjtn001.setExpr("<",  ExpressionType.REL); } | 
+	  ">"  _Expression_Additive() #_Expression() { jjtn002.setExpr(">",  ExpressionType.REL); } | 
+	  "<=" _Expression_Additive() #_Expression() { jjtn003.setExpr("<=", ExpressionType.REL); } | 
+	  ">=" _Expression_Additive() #_Expression() { jjtn004.setExpr(">=", ExpressionType.REL); } )*
 }
 
-void _Expression_Additive(SimpleNode n) #void : {}
+void _Expression_Additive() #void : {}
 {
-	_Expression_Multiplicative(n)
-	( "+" _Expression_Multiplicative(n) { n.setExpr("+",  ExpressionType.ADD); } |
-      "-" _Expression_Multiplicative(n) { n.setExpr("-",  ExpressionType.ADD); } )*
+	_Expression_Multiplicative()
+	( "+" _Expression_Multiplicative() #_Expression() { jjtn001.setExpr("+",  ExpressionType.ADD); } |
+      "-" _Expression_Multiplicative() #_Expression() { jjtn002.setExpr("-",  ExpressionType.ADD); } )*
 }
 
-void _Expression_Multiplicative(SimpleNode n) #void : {}
+void _Expression_Multiplicative() #void : {}
 {
-	_Expression_Unary(n)
-	( "*" _Expression_Unary(n) { n.setExpr("*",  ExpressionType.MUL); } |
-      "/" _Expression_Unary(n) { n.setExpr("/",  ExpressionType.MUL); } |
-	  "%" _Expression_Unary(n) { n.setExpr("%",  ExpressionType.MUL); } )*
+	_Expression_Unary()
+	( "*" _Expression_Unary() #_Expression() { jjtn001.setExpr("*",  ExpressionType.MUL); } |
+      "/" _Expression_Unary() #_Expression() { jjtn002.setExpr("/",  ExpressionType.MUL); } |
+	  "%" _Expression_Unary() #_Expression() { jjtn003.setExpr("%",  ExpressionType.MUL); } )*
 }
 
-void _Expression_Unary(SimpleNode n) #void : {}
+void _Expression_Unary() #void : {}
 {
-	"~" _Expression_Unary(n) { n.setExpr("~",  ExpressionType.UNARY); } |
-	"!" _Expression_Unary(n) { n.setExpr("!",  ExpressionType.UNARY); } |
+	"~" _Expression_Unary() #_Expression() { jjtn001.setExpr("~",  ExpressionType.UNARY); } |
+	"!" _Expression_Unary() #_Expression() { jjtn002.setExpr("!",  ExpressionType.UNARY); } |
 	_Expression_Primary()
 }
 
