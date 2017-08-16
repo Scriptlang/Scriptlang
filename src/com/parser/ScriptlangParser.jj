@@ -28,9 +28,9 @@ options {
 PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
 package com.parser;
 
-import org.javacc.jjtree.JJTree;
-import com.parser.nodes.*;
 import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
+import com.parser.nodes.Node_Literal.LiteralType;
+import com.parser.nodes.Node_Expression.ExpressionType;
 
 public class ScriptlangParser/*@bgen(jjtree)*/implements ScriptlangParserTreeConstants/*@egen*/ {/*@bgen(jjtree)*/
   protected JJTScriptlangParserState jjtree = new JJTScriptlangParserState();
@@ -55,13 +55,13 @@ SKIP :
 |	"\r"
 }
 
-TOKEN :
+TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 {
 	/* Block unit tokens */
 	<LBRACE: "{">
 |	<RBRACE: "}">
 
-	/* Primitive data types. IMPORTANT: DO NOT CHANGE THE DECLARATION ORDER */
+	/* Primitive data types */
 |	<U8:    "u8"   >
 |	<U16:   "u16"  >
 |	<U32:   "u32"  >
@@ -78,9 +78,16 @@ TOKEN :
 |	<ISIZE: "isize">
 |	<AUTO:  "auto" >
 |   <ARRAY: "array">
+|   <LITERAL_SUFFIX: ("i" | "u" | "f" | "uz" | "iz") (<DIGIT_DEC>)+>
 
 	/* Literals */
-|	<INT_LITERAL: (<DIGIT>)+>
+|	<LITERAL_INT_BIN: "0b" (<DIGIT_BIN>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_INT_OCT: "0" (<DIGIT_OCT>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_INT_DEC: (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_INT_HEX: "0x" (<DIGIT_HEX>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_FLOAT32: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_FLOAT64: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_BOOL: ("true" | "false")>
 
 	/* Keywords */
 |	<FN: "fn">         /* Return type void for function declaration */
@@ -88,9 +95,12 @@ TOKEN :
 |	<STRUCT: "struct"> /* Struct declaration                        */
 
 	/* Identifiers */
-|	<IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)*>
+|	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
 |	<#LETTER: ["a"-"z", "A"-"Z"]>
-|	<#DIGIT: ["0"-"9"]>
+|	<#DIGIT_BIN: ["0"-"1"]>
+|	<#DIGIT_OCT: ["0"-"7"]>
+|	<#DIGIT_DEC: ["0"-"9"]>
+|	<#DIGIT_HEX: ["0"-"9", "a"-"z", "A"-"F"]>
 }
 
 /**-----------------**/
@@ -139,8 +149,7 @@ void _All()       : /* Matches any kind of top level construct               */
 /**-------------------------**/
 /** Higher level constructs **/
 /**-------------------------**/
-void _BlockUnit() :
-{/*@bgen(jjtree) _BlockUnit */
+void _BlockUnit() : {/*@bgen(jjtree) _BlockUnit */
   AST_BlockUnit jjtn000 = new AST_BlockUnit(JJT_BLOCKUNIT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
@@ -184,13 +193,6 @@ void _Statement() :
         try {
 /*@egen*/
 	";"/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -203,34 +205,25 @@ void _Statement() :
 void _Declaration()       : /* Any kind of declaration goes here */
 {}
 {
-	( LOOKAHEAD(3) _Declaration_Variable() | /* Variables  */
-      _Declaration_Function()              | /* Functions  */
-      _Declaration_Class()                 | /* Classes    */
-      _Declaration_Struct() )                /* Structures */
-	{}
+	LOOKAHEAD(3) _Declaration_Variable() | /* Variables  */
+	_Declaration_Function()              | /* Functions  */
+	_Declaration_Class()                 | /* Classes    */
+	_Declaration_Struct()                  /* Structures */
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assignment>? ; */
-{/*@bgen(jjtree) _Declaration_Variable */
+void _Declaration_Variable() : {/*@bgen(jjtree) _Declaration_Variable */
   AST_Declaration_Variable jjtn000 = new AST_Declaration_Variable(JJT_DECLARATION_VARIABLE);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
+/*@egen*/} /* Variable declaration: <type> <var_name> <assignment>? ; */
 {/*@bgen(jjtree) _Declaration_Variable */
         try {
 /*@egen*/
 	_Type_Primitive() _Identifier() ( _Assignment() )? ";"/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/ 
-	{}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -251,7 +244,7 @@ void _Declaration_Variable() : /* Variable declaration: <type> <var_name> <assig
             jjtn000.jjtSetLastToken(getToken(0));
           }
         }
-/*@egen*/
+/*@egen*/ 
 }
 
 void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (...) {...} */
@@ -265,13 +258,6 @@ void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (.
         try {
 /*@egen*/
 	( _Type_Primitive() | <FN> ) <IDENTIFIER> "(" ")" _BlockUnit()/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -306,13 +292,6 @@ void _Declaration_Class() :
         try {
 /*@egen*/
 	<CLASS>/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -349,8 +328,7 @@ void _Declaration_Struct() :
 /*@egen*/
 }
 
-void _Expression() : 
-{/*@bgen(jjtree) _Expression */
+void _Expression() : {/*@bgen(jjtree) _Expression */
   AST_Expression jjtn000 = new AST_Expression(JJT_EXPRESSION);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
@@ -358,14 +336,22 @@ void _Expression() :
 /*@egen*/}
 {/*@bgen(jjtree) _Expression */
         try {
-/*@egen*//*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
 /*@egen*/
-	{}/*@bgen(jjtree)*/
+	LOOKAHEAD(3) _Expression_Primary() _Assignment() | _Expression_CondOr(jjtn000)/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -375,24 +361,30 @@ void _Expression() :
 /*@egen*/
 }
 
-void _Assignment() : 
-{/*@bgen(jjtree) _Assignment */
+void _Assignment() : {/*@bgen(jjtree) _Assignment */
   AST_Assignment jjtn000 = new AST_Assignment(JJT_ASSIGNMENT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
+/*@egen*/} /* Assignment: <prim_expr>? = <expr> */
 {/*@bgen(jjtree) _Assignment */
         try {
 /*@egen*/
-	"="/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
+	( _Expression_Primary() )? "=" _Expression()/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -431,49 +423,155 @@ void _Identifier() : /* An identifier. (variable/function name for example) */
 /*@egen*/
 }
 
-void _Literal() :
+void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean, char and string) */
 {/*@bgen(jjtree) _Literal */
   AST_Literal jjtn000 = new AST_Literal(JJT_LITERAL);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
+/*@egen*/ Token t; }
 {/*@bgen(jjtree) _Literal */
         try {
-/*@egen*//*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
 /*@egen*/
-	{}/*@bgen(jjtree)*/
+	t = <LITERAL_INT_BIN>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.INT_BIN); } | /* Binary integer      */
+	t = <LITERAL_INT_OCT>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.INT_OCT); } | /* Octal integer       */
+	t = <LITERAL_INT_DEC>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.INT_DEC); } | /* Decimal integer     */
+	t = <LITERAL_INT_HEX>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.INT_HEX); } | /* Hexadecimal integer */
+	t = <LITERAL_FLOAT32>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.FLOAT32); } | /* 32-bit float        */
+	t = <LITERAL_FLOAT64>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/ { jjtn000.setLiteral(t.image, LiteralType.FLOAT64); } | /* 64-bit float        */
+	t = <LITERAL_BOOL>/*@bgen(jjtree)*/
+                              {
+                                jjtree.closeNodeScope(jjtn000, true);
+                                jjtc000 = false;
+                                jjtn000.jjtSetLastToken(getToken(0));
+                              }
+/*@egen*/    { jjtn000.setLiteral(t.image, LiteralType.BOOL);    }/*@bgen(jjtree)*/
         } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtn000.jjtSetLastToken(getToken(0));
           }
         }
-/*@egen*/
+/*@egen*/   /* Boolean             */
 }
 
 /**--------------------------------------**/
+/**--------------------------------------**/
 /** Lower level *specialised* constructs **/
 /**--------------------------------------**/
-
-/**----------**/
-/** Literals **/
-/**----------**/
+/**--------------------------------------**/
 
 /**-------------**/
 /** Expressions **/
 /**-------------**/
+void _Expression_CondOr(SimpleNode n)       : {}
+{
+	_Expression_CondAnd(n) ( "||" _Expression_CondAnd(n) { n.setExpr("||", ExpressionType.CONDOR); } )*
+}
+
+void _Expression_CondAnd(SimpleNode n)       : {}
+{
+	_Expression_IncOr(n) ( "&&" _Expression_IncOr(n) { n.setExpr("&&", ExpressionType.CONDAND); } )*
+}
+
+void _Expression_IncOr(SimpleNode n)       : {}
+{
+	_Expression_ExOr(n) ( "|" _Expression_ExOr(n) { n.setExpr("|", ExpressionType.INCOR); } )*
+}
+
+void _Expression_ExOr(SimpleNode n)       : {}
+{
+	_Expression_And(n) ( "^" _Expression_And(n) { n.setExpr("^", ExpressionType.EXOR); } )*
+}
+
+void _Expression_And(SimpleNode n)       : {}
+{
+	_Expression_Equal(n) ( "&" _Expression_Equal(n) { n.setExpr("&", ExpressionType.AND); } )*
+}
+
+void _Expression_Equal(SimpleNode n)       : {}
+{
+	_Expression_Relational(n)
+	( "==" _Expression_Relational(n) { n.setExpr("==", ExpressionType.EQUAL); } |
+      "!=" _Expression_Relational(n) { n.setExpr("!=", ExpressionType.EQUAL); } )*
+}
+
+void _Expression_Relational(SimpleNode n)       : {}
+{
+	_Expression_Additive(n) 
+	( "<"  _Expression_Additive(n) { n.setExpr("<",  ExpressionType.REL); } | 
+	  ">"  _Expression_Additive(n) { n.setExpr(">",  ExpressionType.REL); } | 
+	  "<=" _Expression_Additive(n) { n.setExpr("<=", ExpressionType.REL); } | 
+	  ">=" _Expression_Additive(n) { n.setExpr(">=", ExpressionType.REL); } )*
+}
+
+void _Expression_Additive(SimpleNode n)       : {}
+{
+	_Expression_Multiplicative(n)
+	( "+" _Expression_Multiplicative(n) { n.setExpr("+",  ExpressionType.ADD); } |
+      "-" _Expression_Multiplicative(n) { n.setExpr("-",  ExpressionType.ADD); } )*
+}
+
+void _Expression_Multiplicative(SimpleNode n)       : {}
+{
+	_Expression_Unary(n)
+	( "*" _Expression_Unary(n) { n.setExpr("*",  ExpressionType.MUL); } |
+      "/" _Expression_Unary(n) { n.setExpr("/",  ExpressionType.MUL); } |
+	  "%" _Expression_Unary(n) { n.setExpr("%",  ExpressionType.MUL); } )*
+}
+
+void _Expression_Unary(SimpleNode n)       : {}
+{
+	"~" _Expression_Unary(n) { n.setExpr("~",  ExpressionType.UNARY); } |
+	"!" _Expression_Unary(n) { n.setExpr("!",  ExpressionType.UNARY); } |
+	_Expression_Primary()
+}
+
+void _Expression_Primary()       : {} /* Primary Expression: <literal> | <identifier> | ( expression ) */
+{
+	_Literal() | _Identifier() | "(" _Expression() ")"
+}
 
 /**------------**/
 /** Statements **/
 /**------------**/
-void _Statement_Labeled() :
-{/*@bgen(jjtree) _Statement_Labeled */
+void _Statement_Labeled() : {/*@bgen(jjtree) _Statement_Labeled */
   AST_Statement_Labeled jjtn000 = new AST_Statement_Labeled(JJT_STATEMENT_LABELED);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
@@ -483,13 +581,6 @@ void _Statement_Labeled() :
         try {
 /*@egen*/
 	_Identifier() ":" _Statement()/*@bgen(jjtree)*/
-        {
-          jjtree.closeNodeScope(jjtn000, true);
-          jjtc000 = false;
-          jjtn000.jjtSetLastToken(getToken(0));
-        }
-/*@egen*/
-	{}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -514,6 +605,8 @@ void _Statement_Labeled() :
 }
 
 /**-------**/
+
+/**-------**/
 /** Types **/
 /**-------**/
 void _Type_Primitive() : /* All primitive data types are declared here */
@@ -526,10 +619,10 @@ void _Type_Primitive() : /* All primitive data types are declared here */
 {/*@bgen(jjtree) _Type_Primitive */
         try {
 /*@egen*/
-	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>    |
-	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>    |
-	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>   |
-	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>)/*@bgen(jjtree)*/
+	t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>  |
+	t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>  |
+	t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR> |
+	t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;

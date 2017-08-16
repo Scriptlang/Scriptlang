@@ -15,7 +15,7 @@ public class Node_PrimitiveType extends GenericNode {
 	
 	/* TODO Add types: tuple and class objects */
 	
-	PrimitiveType type;
+	PrimitiveType type = PrimitiveType.NULL;
 	
 	public Node_PrimitiveType() {
 		/* Create new generic type */

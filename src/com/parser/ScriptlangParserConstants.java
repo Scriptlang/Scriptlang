@@ -48,19 +48,39 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int ARRAY = 22;
   /** RegularExpression Id. */
-  int INT_LITERAL = 23;
+  int LITERAL_SUFFIX = 23;
   /** RegularExpression Id. */
-  int FN = 24;
+  int LITERAL_INT_BIN = 24;
   /** RegularExpression Id. */
-  int CLASS = 25;
+  int LITERAL_INT_OCT = 25;
   /** RegularExpression Id. */
-  int STRUCT = 26;
+  int LITERAL_INT_DEC = 26;
   /** RegularExpression Id. */
-  int IDENTIFIER = 27;
+  int LITERAL_INT_HEX = 27;
   /** RegularExpression Id. */
-  int LETTER = 28;
+  int LITERAL_FLOAT32 = 28;
   /** RegularExpression Id. */
-  int DIGIT = 29;
+  int LITERAL_FLOAT64 = 29;
+  /** RegularExpression Id. */
+  int LITERAL_BOOL = 30;
+  /** RegularExpression Id. */
+  int FN = 31;
+  /** RegularExpression Id. */
+  int CLASS = 32;
+  /** RegularExpression Id. */
+  int STRUCT = 33;
+  /** RegularExpression Id. */
+  int IDENTIFIER = 34;
+  /** RegularExpression Id. */
+  int LETTER = 35;
+  /** RegularExpression Id. */
+  int DIGIT_BIN = 36;
+  /** RegularExpression Id. */
+  int DIGIT_OCT = 37;
+  /** RegularExpression Id. */
+  int DIGIT_DEC = 38;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 39;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -90,17 +110,45 @@ public interface ScriptlangParserConstants {
     "\"isize\"",
     "\"auto\"",
     "\"array\"",
-    "<INT_LITERAL>",
+    "<LITERAL_SUFFIX>",
+    "<LITERAL_INT_BIN>",
+    "<LITERAL_INT_OCT>",
+    "<LITERAL_INT_DEC>",
+    "<LITERAL_INT_HEX>",
+    "<LITERAL_FLOAT32>",
+    "<LITERAL_FLOAT64>",
+    "<LITERAL_BOOL>",
     "\"fn\"",
     "\"class\"",
     "\"struct\"",
     "<IDENTIFIER>",
     "<LETTER>",
-    "<DIGIT>",
+    "<DIGIT_BIN>",
+    "<DIGIT_OCT>",
+    "<DIGIT_DEC>",
+    "<DIGIT_HEX>",
     "\";\"",
     "\"(\"",
     "\")\"",
     "\"=\"",
+    "\"||\"",
+    "\"&&\"",
+    "\"|\"",
+    "\"^\"",
+    "\"&\"",
+    "\"==\"",
+    "\"!=\"",
+    "\"<\"",
+    "\">\"",
+    "\"<=\"",
+    "\">=\"",
+    "\"+\"",
+    "\"-\"",
+    "\"*\"",
+    "\"/\"",
+    "\"%\"",
+    "\"~\"",
+    "\"!\"",
     "\":\"",
   };
 
