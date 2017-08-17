@@ -3,26 +3,28 @@ package com.parser;
 import com.parser.nodes.*;
 import com.parser.nodes.Node_Expression.ExpressionType;
 import com.parser.nodes.Node_Literal.LiteralType;
-import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
+import com.parser.nodes.Node_TypeModifier.TypeModifier;
+import com.parser.nodes.Node_TypePrimitive.TypePrimitive;
 
 public class NodeSetter {
 	
 	GenericNode thisNode;
+	final String NULLSTR = "(null)";
 	
 	GenericNode setThisNode(GenericNode node, String name) {
 		thisNode = node;
 		thisNode.name = name;
-		thisNode.setIsLeaf(name != "(null)");
+		thisNode.setIsLeaf(name != NULLSTR);
 		return thisNode;
 	}
 	
 	GenericNode setThisNode(GenericNode node) {
-		return setThisNode(node, "(null)");
+		return setThisNode(node, NULLSTR);
 	}
 		
-	public GenericNode setPrimitiveType(String name, PrimitiveType type) {
-		setThisNode(new Node_PrimitiveType(), name);
-		((Node_PrimitiveType)thisNode).set(type);
+	public GenericNode setTypePrimitive(String name, TypePrimitive type) {
+		setThisNode(new Node_TypePrimitive(), name);
+		((Node_TypePrimitive)thisNode).set(type);
 		return thisNode;
 	}
 	
@@ -39,6 +41,12 @@ public class NodeSetter {
 	public GenericNode setExpr(String exprImage, ExpressionType type) {
 		setThisNode(new Node_Expression(), exprImage);
 		((Node_Expression)thisNode).set(type);
+		return thisNode;
+	}
+	
+	public GenericNode setTypeModifier(String name, TypeModifier type) {
+		setThisNode(new Node_TypeModifier(), name);
+		((Node_TypeModifier)thisNode).set(type);
 		return thisNode;
 	}
 }

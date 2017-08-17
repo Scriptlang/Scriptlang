@@ -233,7 +233,7 @@ enum Enumlist {
 	ENUM1,
 	ENUM2,
 	ENUM3,
-}
+};
 
 enum { /* Anonymous enum */
 	ENUM1 = 1, /* Starts at 1 */
@@ -251,6 +251,7 @@ enum { /* It can be anonymous */
 		u8 x,y,z;
 	},
 	Tuple(u8, u16, u32) /* Match this tuple */
+	(u8, f64) /* Anonymous tuples are allowed */
 };
 
 /* We may also do this: */
@@ -261,6 +262,17 @@ struct Mystruct {
 enum {
 	ENUM1,
 	struct Mystruct /* We might want to declare the struct elsewhere */
+};
+
+enum {
+	ENUM1,
+	/* Or perhaps a function which could act as a lambda */
+	u8 mylambda() {
+		u8 a = 1;
+		u8 b = 2;
+		a + b
+	},
+	ENUM2,
 };
 
 /*--------------*/
@@ -294,12 +306,13 @@ for(auto file : ls) {
 /* 4- Add memory specifications (stack, heap, safety, variable binding, etc)  */
 /* 5- Pointers (smart pointers only)                                          */
 /* 6- Add scope                                                               */
-/* 7- Add imports                                                             */
-/* 8- Add error handling                                                      */
-/* 9- Add Lamdbas                                                             */
-/* 10- Add variadics                                                          */
-/* 11- Add macros                                                             */
-/* 12- Add threads                                                            */
-/* 13- Add threads                                                            */
-/* 14- Add attributes                                                         */
-/* 15- Add test system                                                        */
+/* 7- Add function overloading                                                */
+/* 8- Add operator overloading                                                */
+/* 9- Add imports                                                             */
+/* 10- Add error handling                                                     */
+/* 11- Add Lambdas                                                            */
+/* 12- Add variadics                                                          */
+/* 13- Add macros                                                             */
+/* 14- Add threads                                                            */
+/* 15- Add attributes                                                         */
+/* 16- Add test system                                                        */

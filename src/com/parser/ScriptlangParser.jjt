@@ -27,7 +27,8 @@ options {
 PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
 package com.parser;
 
-import com.parser.nodes.Node_PrimitiveType.PrimitiveType;
+import com.parser.nodes.Node_TypePrimitive.TypePrimitive;
+import com.parser.nodes.Node_TypeModifier.TypeModifier;
 import com.parser.nodes.Node_Literal.LiteralType;
 import com.parser.nodes.Node_Expression.ExpressionType;
 
@@ -90,10 +91,12 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<CLASS:  "class" > /* Class declaration                         */
 |	<STRUCT: "struct"> /* Struct declaration                        */
 |	<ENUM:   "enum"  > /* Enum declaration                          */
+|   <PUB:    "pub"   > /* Public modifier                           */
+|   <PRIV:   "priv"  > /* Private modifier                          */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
-|	<#LETTER: ["a"-"z", "A"-"Z"]>
+|	<#LETTER: ["a"-"z", "A"-"Z", "_"]>
 |	<#DIGIT_BIN: ["0"-"1"]>
 |	<#DIGIT_OCT: ["0"-"7"]>
 |	<#DIGIT_DEC: ["0"-"9"]>
@@ -103,16 +106,15 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 /**-----------------**/
 /** Root production **/
 /**-----------------**/
-void _Root() :
-{}
+void _Root() : {}
 {
 	( _All() )* <EOF>
 }
 
-void _All() #void : /* Matches any kind of top level construct               */
-{}                  /* (blocks ({}), statements and any kind of declaration) */
+void _All() #void : {} /* Matches any kind of top level construct               */
+                       /* (blocks ({}), statements and any kind of declaration) */
 {
-	_BlockUnit() | _Statement() | _Declaration()
+	_BlockUnit() | _Statement() | LOOKAHEAD(3) _Expression() | LOOKAHEAD(2) _Declaration() | _Type_Modifier() ":"
 }
 
 /**-------------------------**/
@@ -123,54 +125,106 @@ void _BlockUnit() : {}
     <LBRACE> ( _All() )* <RBRACE>
 }
 
-void _Statement() :
-{}
+void _Statement() : {}
 {
 	";"
 }
 
-void _Declaration() #void : /* Any kind of declaration goes here */
-{}
+void _Declaration() #void : {} /* Any kind of declaration goes here */
 {
-	LOOKAHEAD(3) _Declaration_Variable() | /* Variables   */
-	_Declaration_Function()              | /* Functions   */
-	_Declaration_Class()                 | /* Classes     */
-	_Declaration_Struct()                | /* Structures  */
+	LOOKAHEAD(2) _Declaration_Variable() | /* Variables   */
+	LOOKAHEAD(2) _Declaration_Function() | /* Functions   */
+	LOOKAHEAD(2) _Declaration_Class()    | /* Classes     */
+	LOOKAHEAD(2) _Declaration_Struct()   | /* Structures  */
 	_Declaration_Enum()                    /* Enumerators */
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _Declaration_Variable() : {} /* Variable declaration: <type> <var_name> <assignment>? ; */
+void _Declaration_Variable() : {} /* Variable declaration: <modif>? <type> <var_name> <assignment>? ; */
 {
-	_Type_Primitive() _Identifier() ( _Assignment() )? ";" 
+	( _Type_Modifier() )? _Type_Primitive() _Identifier() ( _Assignment() )? ";" 
 }
 
-void _Declaration_Function() : /* Function declaration: <type>|fn <func_name> (...) {...} */
-{}
+void _Declaration_Function() : {} /* Function declaration: <modif>? (<type>|fn)? <IDENTIFIER> (<params>?) { <blockunit> } */
 {
-	( _Type_Primitive() | <FN> ) <IDENTIFIER> "(" ")" _BlockUnit()
+	( _Type_Modifier() )? ( _Type_Primitive() | <FN> )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
 }
 
-void _Declaration_Class() :
-{}
+void _Declaration_Function_Lambda() : {} /* Function declaration: <modif>? <type> <IDENTIFIER>? (<params>?) { <blockunit> } */
 {
-	<CLASS>
+	( _Type_Modifier() )? _Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
 }
 
-void _Declaration_Struct() :
-{}
+void _Declaration_Function_Lambda_Nomod() : {} /* Lambda declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
 {
-	<STRUCT>
-	{}
+	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" ( _BlockUnit() )?
 }
 
-void _Declaration_Enum() :
-{}
+void _Declaration_Struct() : {} /* Struct declaration: <modif>? struct <IDENTIFIER> { <declaration>* } ; */
 {
-	<ENUM>
-	{}
+	( _Type_Modifier() )? <STRUCT> _Identifier() "{" ( _Declaration() )* "}" ";"
+}
+
+void _Declaration_Class() : {} /* Class declaration: <modif>? class <IDENTIFIER> ( : (<type>? <IDENTIFIER> ,?)* )? <blockunit> */
+{
+	( _Type_Modifier() )? <CLASS> _Identifier() ( ":" ( ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit() ";"
+}
+
+void _Declaration_Enum() : {} /* Enum declaration: <modif>? enum <IDENTIFIER>? { <enumbodylist>  } */
+{
+	( _Type_Modifier() )? <ENUM> ( _Identifier() )? "{" ( _Declaration_EnumBody_List() )? "}" ";"
+}
+
+void _Declaration_EnumBody_List() #void : {} /* Enum body list declaration */
+{
+	( _Declaration_EnumBody() ( "," )? )+
+}
+
+void _Declaration_EnumBody() #void : {} /* Enum body declaration: <enumconstlist> | <struct> | <tuple> | <function>|  */
+{	
+	/* An enum can have ... */
+	LOOKAHEAD(3) _Declaration_Tuple()           | /* A named tuple                      */
+	LOOKAHEAD(3) _Declaration_EnumBody_Struct() | /* A struct declaration               */
+	_Declaration_EnumBody_Struct_Bodyless()     | /* A struct without a body            */
+	_Declaration_EnumBody_Const()               | /* A constant identifier              */
+	_Declaration_Function_Lambda_Nomod()          /* A function, which acts as a lambda */
+}
+
+void _Declaration_EnumBody_Const() : {} /* Enum body const declaration: <IDENTIFIER> <assignment>?  */
+{
+	_Identifier() ( LOOKAHEAD(2) _Assignment() )?
+}
+
+void _Declaration_EnumBody_Struct() : {} /* Enum body struct declaration: <struct>? <IDENTIFIER> { <declaration>* } */
+{
+	( <STRUCT> )? _Identifier() "{" ( _Declaration() )* "}"
+}
+
+void _Declaration_EnumBody_Struct_Bodyless() : {} /* Enum body struct declaration: <struct> <IDENTIFIER> */
+{
+	<STRUCT> _Identifier()
+}
+
+void _Declaration_Tuple() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <type>, ...) */
+{
+	( _Identifier() )? "(" ( _Declaration_TypeList() )+ ")"
+}
+
+void _Declaration_TypeList() : {} /* Type list declaration: <type>, <type>, <type>, ... */
+{
+	(LOOKAHEAD(2) _Type_Primitive() ( "," )? )+
+}
+
+void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <IDENTIFIER> , <type> <DENTIFIER>, <type>, <type> , ... */
+{
+	( _Declaration_Parameter_Single() ( "," )? )+
+}
+
+void _Declaration_Parameter_Single() : {} /* Declaration of a single function argument: <type> <IDENTIFIER> */
+{
+	_Type_Primitive() ( _Identifier() )?
 }
 
 void _Expression() #void : {}
@@ -205,11 +259,11 @@ void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean,
 	t = <LITERAL_BOOL>    { jjtThis.setLiteral(t.image, LiteralType.BOOL);    }   /* Boolean             */
 }
 
-/**--------------------------------------**/
+/******************************************/
 /**--------------------------------------**/
 /** Lower level *specialised* constructs **/
 /**--------------------------------------**/
-/**--------------------------------------**/
+/******************************************/
 
 /**-------------**/
 /** Expressions **/
@@ -308,19 +362,17 @@ void _Statement_Labeled() : {}
 }
 
 /**-------**/
-
-/**-------**/
 /** Types **/
 /**-------**/
 void _Type_Primitive() : /* All primitive data types are declared here */
 { Token t; }
 {
-	t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>  |
-	t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>  |
-	t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR> |
-	t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY>
+	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>  |
+	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>  |
+	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR> |
+	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY> )
 	{
-		jjtThis.setPrimitiveType(t.image, PrimitiveType.values()[t.kind - U8 + 1]);
+		jjtThis.setTypePrimitive(t.image, TypePrimitive.values()[t.kind - U8 + 1]);
 	}
 }
 
@@ -334,5 +386,14 @@ Token _Type_Suffix() #void : /* Supported data type suffixes */
 	  t=<LITERAL_SUFFIX> )
 	{
 		return t;
+	}
+}
+
+void _Type_Modifier() : /* Access modifiers go here (such as pub and priv (aka public and private)) */
+{ Token t; }
+{
+	( t=<PUB> | t=<PRIV> )
+	{
+		jjtThis.setTypeModifier(t.image, TypeModifier.values()[t.kind - PUB + 1]);
 	}
 }

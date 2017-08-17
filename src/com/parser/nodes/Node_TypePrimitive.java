@@ -1,11 +1,11 @@
 package com.parser.nodes;
 
-public class Node_PrimitiveType extends GenericNode {
+public class Node_TypePrimitive extends GenericNode {
 	
 	/**---------------------------------------------**/
 	/** Scriptlang's primitive data types supported **/
 	/**---------------------------------------------**/
-	public enum PrimitiveType {
+	public enum TypePrimitive {
 		NULL,
 		U8,    U16,   U32,   U64,
 		I8,    I16,   I32,   I64,
@@ -15,14 +15,14 @@ public class Node_PrimitiveType extends GenericNode {
 	
 	/* TODO Add types: tuple and class objects */
 	
-	PrimitiveType type = PrimitiveType.NULL;
+	TypePrimitive type = TypePrimitive.NULL;
 	
-	public Node_PrimitiveType() {
+	public Node_TypePrimitive() {
 		/* Create new generic type */
-		super(Node_PrimitiveType.class);
+		super(Node_TypePrimitive.class);
 	}
 	
-	public void set(PrimitiveType type) {
+	public void set(TypePrimitive type) {
 		this.type = type;
 	}
 }

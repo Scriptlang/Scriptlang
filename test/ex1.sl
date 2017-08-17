@@ -1,8 +1,45 @@
-{
-	u8 v = (u10)((u8)((3 + 1) * 4 - (u32)2) - (u16)(5i8 / ((0b10 >> 2) * 10)));
-	u16 v2 = 2;
+fn foo(u8, u16 a) {
+
 }
-{
-	u8 v3 = 20.1;
-	u16 v4;
-}
+
+struct a {
+	char a = 1;
+};
+
+class Myclass : pub a, priv b {
+pub:
+	priv Myclass() {
+		
+	}
+
+	fn public_function() {
+
+	}
+
+	u8 pubdata;
+
+priv:
+	fn private_function() {
+
+	}
+
+	u8 privdata;
+};
+
+pub:
+u64 myval = 20+10;
+priv:
+char priv_val = 2;
+
+pub enum Enumlist {
+	ENUM1 = 1,
+	ENUM2,
+	ENUM3,
+	u8 MyStruct() {
+
+	},
+
+	u32 foo(),
+
+	Tuple(u8)
+};

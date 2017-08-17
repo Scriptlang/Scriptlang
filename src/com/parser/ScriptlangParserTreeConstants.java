@@ -9,15 +9,26 @@ public interface ScriptlangParserTreeConstants
   public int JJT_STATEMENT = 3;
   public int JJT_DECLARATION_VARIABLE = 4;
   public int JJT_DECLARATION_FUNCTION = 5;
-  public int JJT_DECLARATION_CLASS = 6;
-  public int JJT_DECLARATION_STRUCT = 7;
-  public int JJT_DECLARATION_ENUM = 8;
-  public int JJT_ASSIGNMENT = 9;
-  public int JJT_IDENTIFIER = 10;
-  public int JJT_LITERAL = 11;
-  public int JJT_EXPRESSION = 12;
-  public int JJT_STATEMENT_LABELED = 13;
-  public int JJT_TYPE_PRIMITIVE = 14;
+  public int JJT_DECLARATION_FUNCTION_LAMBDA = 6;
+  public int JJT_DECLARATION_FUNCTION_LAMBDA_NOMOD = 7;
+  public int JJT_DECLARATION_STRUCT = 8;
+  public int JJT_DECLARATION_CLASS = 9;
+  public int JJT_DECLARATION_CLASS_INHERITANCE = 10;
+  public int JJT_DECLARATION_ENUM = 11;
+  public int JJT_DECLARATION_ENUMBODY_CONST = 12;
+  public int JJT_DECLARATION_ENUMBODY_STRUCT = 13;
+  public int JJT_DECLARATION_ENUMBODY_STRUCT_BODYLESS = 14;
+  public int JJT_DECLARATION_TUPLE = 15;
+  public int JJT_DECLARATION_TYPELIST = 16;
+  public int JJT_DECLARATION_PARAMETER_LIST = 17;
+  public int JJT_DECLARATION_PARAMETER_SINGLE = 18;
+  public int JJT_ASSIGNMENT = 19;
+  public int JJT_IDENTIFIER = 20;
+  public int JJT_LITERAL = 21;
+  public int JJT_EXPRESSION = 22;
+  public int JJT_STATEMENT_LABELED = 23;
+  public int JJT_TYPE_PRIMITIVE = 24;
+  public int JJT_TYPE_MODIFIER = 25;
 
 
   public String[] jjtNodeName = {
@@ -27,15 +38,26 @@ public interface ScriptlangParserTreeConstants
     "_Statement",
     "_Declaration_Variable",
     "_Declaration_Function",
-    "_Declaration_Class",
+    "_Declaration_Function_Lambda",
+    "_Declaration_Function_Lambda_Nomod",
     "_Declaration_Struct",
+    "_Declaration_Class",
+    "_Declaration_Class_Inheritance",
     "_Declaration_Enum",
+    "_Declaration_EnumBody_Const",
+    "_Declaration_EnumBody_Struct",
+    "_Declaration_EnumBody_Struct_Bodyless",
+    "_Declaration_Tuple",
+    "_Declaration_TypeList",
+    "_Declaration_Parameter_List",
+    "_Declaration_Parameter_Single",
     "_Assignment",
     "_Identifier",
     "_Literal",
     "_Expression",
     "_Statement_Labeled",
     "_Type_Primitive",
+    "_Type_Modifier",
   };
 }
-/* JavaCC - OriginalChecksum=4bda4defb9d8a25bd09b9ac22368a265 (do not edit this line) */
+/* JavaCC - OriginalChecksum=fe8e07b4d18eb1d16c2177ac4efd3313 (do not edit this line) */
