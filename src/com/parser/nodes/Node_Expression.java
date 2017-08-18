@@ -15,17 +15,20 @@ public class Node_Expression extends GenericNode {
 		ADD,     /* + , -        */
 		MUL,     /* * , / , %    */
 		CAST,    /* (<type>)     */
-		UNARY    /* ~ , !        */
+		UNARY,   /* ~ , !        */
+		BLOB     /* Multiple expressions */
 	}
 	
 	ExpressionType type = ExpressionType.NULL;
+	boolean returnable = false;
 	
 	public Node_Expression() {
 		/* Create new generic type */
 		super(Node_Expression.class);
 	}
 	
-	public void set(ExpressionType type) {
+	public void set(ExpressionType type, boolean returnable) {
 		this.type = type;
+		this.returnable = returnable;
 	}
 }

@@ -38,10 +38,14 @@ public class NodeSetter {
 		return thisNode;
 	}
 	
-	public GenericNode setExpr(String exprImage, ExpressionType type) {
+	public GenericNode setExpr(String exprImage, ExpressionType type, boolean returnable) {
 		setThisNode(new Node_Expression(), exprImage);
-		((Node_Expression)thisNode).set(type);
+		((Node_Expression)thisNode).set(type, returnable);
 		return thisNode;
+	}
+	
+	public GenericNode setExpr(String exprImage, ExpressionType type) {
+		return setExpr(exprImage, type, false);
 	}
 	
 	public GenericNode setTypeModifier(String name, TypeModifier type) {

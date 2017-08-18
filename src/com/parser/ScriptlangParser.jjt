@@ -87,12 +87,14 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<LITERAL_BOOL: ("true" | "false")>
 
 	/* Keywords */
-|	<FN:     "fn"    > /* Return type void for function declaration */
-|	<CLASS:  "class" > /* Class declaration                         */
-|	<STRUCT: "struct"> /* Struct declaration                        */
-|	<ENUM:   "enum"  > /* Enum declaration                          */
-|   <PUB:    "pub"   > /* Public modifier                           */
-|   <PRIV:   "priv"  > /* Private modifier                          */
+|	<FN:     "fn"    > /* Return type void for function declaration  */
+|	<CLASS:  "class" > /* Class declaration                          */
+|	<STRUCT: "struct"> /* Struct declaration                         */
+|	<ENUM:   "enum"  > /* Enum declaration                           */
+|	<PUB:    "pub"   > /* Public modifier                            */
+|	<PRIV:   "priv"  > /* Private modifier                           */
+|	<IF:     "if"    > /* Start of an if statement                   */
+|	<ELSE:   "else"  > /* Start of an else branch of an if statement */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -111,10 +113,20 @@ void _Root() : {}
 	( _All() )* <EOF>
 }
 
-void _All() #void : {} /* Matches any kind of top level construct               */
-                       /* (blocks ({}), statements and any kind of declaration) */
+void _All() #void : /* Matches any kind of top level construct */
+{ Token t = null; }
 {
-	_BlockUnit() | _Statement() | LOOKAHEAD(3) _Expression() | LOOKAHEAD(2) _Declaration() | _Type_Modifier() ":"
+	LOOKAHEAD(2) _BlockUnit()   | /* A block unit -> {...} */ 
+	
+	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
+	LOOKAHEAD(3) _Expression() #_Expression() ( LOOKAHEAD(2) t = ";" )?
+		{
+			jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
+		} |
+
+	LOOKAHEAD(2) _Statement()   | /* Statements -> if, switch, for, while                           */
+	LOOKAHEAD(2) _Declaration() | /* Declarations -> variables, functions, classes, structs, enums  */
+	_Type_Modifier() ":"          /* An access modifier for the actual top level module             */
 }
 
 /**-------------------------**/
@@ -122,12 +134,18 @@ void _All() #void : {} /* Matches any kind of top level construct               
 /**-------------------------**/
 void _BlockUnit() : {}
 {
-    <LBRACE> ( _All() )* <RBRACE>
+    ( _Identifier() )? <LBRACE> ( _All() )* <RBRACE>
 }
 
-void _Statement() : {}
+void _Statement() #void : {}
 {
-	";"
+	";" |
+	LOOKAHEAD(3) _Statement_Labeled()                    |
+	LOOKAHEAD(2) _Expression_Primary() _Assignment() ";" |
+	LOOKAHEAD(3) _Statement_If()                         |
+	LOOKAHEAD(3) _Statement_Switch()                     | 
+	LOOKAHEAD(3) _Statement_For()                        |
+	_Statement_While()                  
 }
 
 void _Declaration() #void : {} /* Any kind of declaration goes here */
@@ -144,7 +162,7 @@ void _Declaration() #void : {} /* Any kind of declaration goes here */
 /**----------------------------------**/
 void _Declaration_Variable() : {} /* Variable declaration: <modif>? <type> <var_name> <assignment>? ; */
 {
-	( _Type_Modifier() )? _Type_Primitive() _Identifier() ( _Assignment() )? ";" 
+	( _Type_Modifier() )? _Type_Primitive() _Identifier() ( "," _Identifier() )* ( _Assignment() )? ";" 
 }
 
 void _Declaration_Function() : {} /* Function declaration: <modif>? (<type>|fn)? <IDENTIFIER> (<params>?) { <blockunit> } */
@@ -159,7 +177,7 @@ void _Declaration_Function_Lambda() : {} /* Function declaration: <modif>? <type
 
 void _Declaration_Function_Lambda_Nomod() : {} /* Lambda declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
 {
-	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" ( _BlockUnit() )?
+	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" (LOOKAHEAD(2) _BlockUnit() )?
 }
 
 void _Declaration_Struct() : {} /* Struct declaration: <modif>? struct <IDENTIFIER> { <declaration>* } ; */
@@ -167,9 +185,9 @@ void _Declaration_Struct() : {} /* Struct declaration: <modif>? struct <IDENTIFI
 	( _Type_Modifier() )? <STRUCT> _Identifier() "{" ( _Declaration() )* "}" ";"
 }
 
-void _Declaration_Class() : {} /* Class declaration: <modif>? class <IDENTIFIER> ( : (<type>? <IDENTIFIER> ,?)* )? <blockunit> */
+void _Declaration_Class() : {} /* Class declaration: <modif>? class <IDENTIFIER> ( : (<modif>? <IDENTIFIER> , ...)+ )? <blockunit> */
 {
-	( _Type_Modifier() )? <CLASS> _Identifier() ( ":" ( ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit() ";"
+	( _Type_Modifier() )? <CLASS> _Identifier() ( ":" ( LOOKAHEAD(2) ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit() ";"
 }
 
 void _Declaration_Enum() : {} /* Enum declaration: <modif>? enum <IDENTIFIER>? { <enumbodylist>  } */
@@ -217,7 +235,7 @@ void _Declaration_TypeList() : {} /* Type list declaration: <type>, <type>, <typ
 	(LOOKAHEAD(2) _Type_Primitive() ( "," )? )+
 }
 
-void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <IDENTIFIER> , <type> <DENTIFIER>, <type>, <type> , ... */
+void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <IDENTIFIER>, <type> <IDENTIFIER>, <type>, <type>, ... */
 {
 	( _Declaration_Parameter_Single() ( "," )? )+
 }
@@ -225,6 +243,11 @@ void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <I
 void _Declaration_Parameter_Single() : {} /* Declaration of a single function argument: <type> <IDENTIFIER> */
 {
 	_Type_Primitive() ( _Identifier() )?
+}
+
+void _Declaration_Parameter_Caller_List() : {} /* Parameter list declaration: <IDENTIFIER>, <expression>, <IDENTIFIER>, ... */
+{
+	( _Expression() #_Declaration_Parameter_Caller_Single() ( "," )? )*
 }
 
 void _Expression() #void : {}
@@ -337,8 +360,8 @@ void _Expression_Cast() #void :
 	LOOKAHEAD(2) "(" t = _Type_Suffix() ")" _Expression_Unary() #_Expression()
 	{
 		jjtn001.setExpr("(" + t.image + ")",  ExpressionType.CAST);
-	}
-|	_Expression_Unary()
+	} |
+	_Expression_Unary()
 }
 
 void _Expression_Unary() #void : {}
@@ -348,15 +371,39 @@ void _Expression_Unary() #void : {}
 	_Expression_Primary()
 }
 
-void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> | ( expression ) */
+void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) */
 {
-	_Literal() | _Identifier() | "(" _Expression() ")"
+	_Literal() |
+	LOOKAHEAD(2) _Identifier() ( LOOKAHEAD(2) "(" ( _Declaration_Parameter_Caller_List() ) ")" )? |
+	"(" _Expression() ")" |
+	_BlockUnit()
 }
 
 /**------------**/
 /** Statements **/
 /**------------**/
 void _Statement_Labeled() : {}
+{
+	_Identifier() ":" _Statement()
+}
+
+void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|{ <all> }) (else (<blockunit>|{<all>}))? */
+{
+	<IF> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_True()
+	( LOOKAHEAD(2) <ELSE> ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_False() )?
+}
+
+void _Statement_Switch() : {}
+{
+	_Identifier() ":" _Statement()
+}
+
+void _Statement_For() : {}
+{
+	_Identifier() ":" _Statement()
+}
+
+void _Statement_While() : {}
 {
 	_Identifier() ":" _Statement()
 }

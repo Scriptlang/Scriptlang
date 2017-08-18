@@ -43,3 +43,22 @@ pub enum Enumlist {
 
 	Tuple(u8)
 };
+
+b(1, (a+1+a+b) * (2/10));
+
+
+myblock {
+ 
+
+
+	yes {
+		a+1
+	}
+}
+
+if(a) {
+	;
+	1+2
+}
+
+u8 a,b,c = (char)(b+1);
