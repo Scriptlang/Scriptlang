@@ -159,6 +159,8 @@ public interface ScriptlangParserConstants {
     "\",\"",
     "\"(\"",
     "\")\"",
+    "\"[\"",
+    "\"]\"",
     "\"=\"",
     "\"||\"",
     "\"&&\"",

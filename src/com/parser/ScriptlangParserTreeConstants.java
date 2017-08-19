@@ -19,7 +19,7 @@ public interface ScriptlangParserTreeConstants
   public int JJT_DECLARATION_ENUMBODY_STRUCT = 13;
   public int JJT_DECLARATION_ENUMBODY_STRUCT_BODYLESS = 14;
   public int JJT_DECLARATION_TUPLE = 15;
-  public int JJT_DECLARATION_TUPLE_IDENTIFIER_ONLY = 16;
+  public int JJT_DECLARATION_BIND = 16;
   public int JJT_DECLARATION_TYPELIST = 17;
   public int JJT_DECLARATION_PARAMETER_LIST = 18;
   public int JJT_DECLARATION_PARAMETER_SINGLE = 19;
@@ -37,11 +37,10 @@ public interface ScriptlangParserTreeConstants
   public int JJT_STATEMENT_SWITCH_LINE = 31;
   public int JJT_STATEMENT_SWITCH_LINE_BODY_LIST = 32;
   public int JJT_STATEMENT_SWITCH_MATCH_SINGLE = 33;
-  public int JJT_STATEMENT_SWITCH_PATTERN_BIND = 34;
-  public int JJT_STATEMENT_FOR = 35;
-  public int JJT_STATEMENT_WHILE = 36;
-  public int JJT_TYPE_PRIMITIVE = 37;
-  public int JJT_TYPE_MODIFIER = 38;
+  public int JJT_STATEMENT_FOR = 34;
+  public int JJT_STATEMENT_WHILE = 35;
+  public int JJT_TYPE_PRIMITIVE = 36;
+  public int JJT_TYPE_MODIFIER = 37;
 
 
   public String[] jjtNodeName = {
@@ -61,7 +60,7 @@ public interface ScriptlangParserTreeConstants
     "_Declaration_EnumBody_Struct",
     "_Declaration_EnumBody_Struct_Bodyless",
     "_Declaration_Tuple",
-    "_Declaration_Tuple_Identifier_Only",
+    "_Declaration_Bind",
     "_Declaration_TypeList",
     "_Declaration_Parameter_List",
     "_Declaration_Parameter_Single",
@@ -79,11 +78,10 @@ public interface ScriptlangParserTreeConstants
     "_Statement_Switch_Line",
     "_Statement_Switch_Line_Body_List",
     "_Statement_Switch_Match_Single",
-    "_Statement_Switch_Pattern_Bind",
     "_Statement_For",
     "_Statement_While",
     "_Type_Primitive",
     "_Type_Modifier",
   };
 }
-/* JavaCC - OriginalChecksum=d2ee6d859e253515a1007cf6476d719f (do not edit this line) */
+/* JavaCC - OriginalChecksum=c815c7b5a7df34794f215b0d8c6799f6 (do not edit this line) */

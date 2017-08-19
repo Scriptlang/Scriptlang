@@ -98,7 +98,7 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<SWITCH: "switch"> /* Start of a switch statement                */
 |	<FOR:    "for"   > /* Start of a for loop statement              */
 |	<WHILE:  "while" > /* Start of a while loop statement            */
-|   <BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
+|	<BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -234,9 +234,10 @@ void _Declaration_Tuple() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<t
 	( _Identifier() )? "(" ( _Declaration_TypeList() )+ ")"
 }
 
-void _Declaration_Tuple_Identifier_Only() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <type>, ...) */
+void _Declaration_Bind() : {} /* Bind declaration: <IDENTIFIER>? | [<IDENTIFIER>,? <IDENTIFIER>,? ...] @ */
 {
-	"(" ( ( _Identifier() | _Declaration_Tuple_Identifier_Only() ) ( "," )? )+ ")"
+	( _Identifier() )? <BIND> |
+	"[" ( ( LOOKAHEAD(2) _Identifier() | _Declaration_Bind() ) ( "," )? )+ "]" <BIND>
 }
 
 void _Declaration_TypeList() : {} /* Type list declaration: <type>, <type>, <type>, ... */
@@ -414,7 +415,7 @@ void _Statement_Switch() : {} /* Switch statement: switch ( <match>+ ) { <switch
 void _Statement_Switch_Line() : {}
 {
 	/* Switch condition list of a single switch line */
-	( _Statement_Switch_Pattern_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) ) #_Statement_Switch_Match_List() ":"
+	( _Declaration_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) ) #_Statement_Switch_Match_List() ":"
 	
 	/* Switch body list of a single switch line */
 	( LOOKAHEAD(3) _BlockUnit() #_Statement_Switch_Line_Body_List() |
@@ -439,11 +440,6 @@ void _Statement_Switch_Line_Body_Single() #void :
 
 	LOOKAHEAD(3) _Statement()   | /* Statements -> if, switch, for, while                          */
 	LOOKAHEAD(2) _Declaration()   /* Declarations -> variables, functions, classes, structs, enums */
-}
-
-void _Statement_Switch_Pattern_Bind() : {}
-{
-	( _Identifier() | _Declaration_Tuple_Identifier_Only() )? <BIND>
 }
 
 void _Statement_For() : {}

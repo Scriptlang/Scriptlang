@@ -102,7 +102,7 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<SWITCH: "switch"> /* Start of a switch statement                */
 |	<FOR:    "for"   > /* Start of a for loop statement              */
 |	<WHILE:  "while" > /* Start of a while loop statement            */
-|   <BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
+|	<BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -660,16 +660,17 @@ void _Declaration_Tuple() : {/*@bgen(jjtree) _Declaration_Tuple */
 /*@egen*/
 }
 
-void _Declaration_Tuple_Identifier_Only() : {/*@bgen(jjtree) _Declaration_Tuple_Identifier_Only */
-  AST_Declaration_Tuple_Identifier_Only jjtn000 = new AST_Declaration_Tuple_Identifier_Only(JJT_DECLARATION_TUPLE_IDENTIFIER_ONLY);
+void _Declaration_Bind() : {/*@bgen(jjtree) _Declaration_Bind */
+  AST_Declaration_Bind jjtn000 = new AST_Declaration_Bind(JJT_DECLARATION_BIND);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <type>, ...) */
-{/*@bgen(jjtree) _Declaration_Tuple_Identifier_Only */
+/*@egen*/} /* Bind declaration: <IDENTIFIER>? | [<IDENTIFIER>,? <IDENTIFIER>,? ...] @ */
+{/*@bgen(jjtree) _Declaration_Bind */
         try {
 /*@egen*/
-	"(" ( ( _Identifier() | _Declaration_Tuple_Identifier_Only() ) ( "," )? )+ ")"/*@bgen(jjtree)*/
+	( _Identifier() )? <BIND> |
+	"[" ( ( LOOKAHEAD(2) _Identifier() | _Declaration_Bind() ) ( "," )? )+ "]" <BIND>/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -1938,7 +1939,7 @@ void _Statement_Switch_Line() : {/*@bgen(jjtree) _Statement_Switch_Line */
         try {
 /*@egen*/
 	/* Switch condition list of a single switch line */
-	( _Statement_Switch_Pattern_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) )/*@bgen(jjtree)*/
+	( _Declaration_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) )/*@bgen(jjtree)*/
         } catch (Throwable jjte001) {
           if (jjtc001) {
             jjtree.clearNodeScope(jjtn001);
@@ -2149,39 +2150,6 @@ void _Statement_Switch_Line_Body_Single()       :
 
 	LOOKAHEAD(3) _Statement()   | /* Statements -> if, switch, for, while                          */
 	LOOKAHEAD(2) _Declaration()   /* Declarations -> variables, functions, classes, structs, enums */
-}
-
-void _Statement_Switch_Pattern_Bind() : {/*@bgen(jjtree) _Statement_Switch_Pattern_Bind */
-  AST_Statement_Switch_Pattern_Bind jjtn000 = new AST_Statement_Switch_Pattern_Bind(JJT_STATEMENT_SWITCH_PATTERN_BIND);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-  jjtn000.jjtSetFirstToken(getToken(1));
-/*@egen*/}
-{/*@bgen(jjtree) _Statement_Switch_Pattern_Bind */
-        try {
-/*@egen*/
-	( _Identifier() | _Declaration_Tuple_Identifier_Only() )? <BIND>/*@bgen(jjtree)*/
-        } catch (Throwable jjte000) {
-          if (jjtc000) {
-            jjtree.clearNodeScope(jjtn000);
-            jjtc000 = false;
-          } else {
-            jjtree.popNode();
-          }
-          if (jjte000 instanceof RuntimeException) {
-            throw (RuntimeException)jjte000;
-          }
-          if (jjte000 instanceof ParseException) {
-            throw (ParseException)jjte000;
-          }
-          throw (Error)jjte000;
-        } finally {
-          if (jjtc000) {
-            jjtree.closeNodeScope(jjtn000, true);
-            jjtn000.jjtSetLastToken(getToken(0));
-          }
-        }
-/*@egen*/
 }
 
 void _Statement_For() : {/*@bgen(jjtree) _Statement_For */

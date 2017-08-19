@@ -112,7 +112,7 @@ switch(u8) {
 
 char a = if(1) {};
 
-char c = switch(a) { @1: a * n, @2: a*n, (n,n2)@3,2: a*n*n2  };
+char c = switch(a) { @1: a * n, @2: a*n, [n,n2]@3,2: a*n*n2  };
 
 switch(var) {
 	@1: one();
@@ -130,13 +130,14 @@ switch(var) {
 		six();
 		seven();
 
-	@u8: isU8();
+	@u8: isU8(); 
 
 	@equalto(): lambdaMatch();
 
-	@else: {
+	@else: 
 		none();
-	}
-	@:
+	@: 
 		none();
+	[bindall]@:
+		func(bindall);
 }
