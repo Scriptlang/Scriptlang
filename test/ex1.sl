@@ -8,8 +8,8 @@ struct a {
 
 class Myclass : pub a, priv b {
 pub:
-	priv Myclass() {
-		
+	pub fn Myclass() {
+		1
 	}
 
 	fn public_function() {
@@ -35,7 +35,7 @@ pub enum Enumlist {
 	ENUM1 = 1,
 	ENUM2,
 	ENUM3,
-	u8 MyStruct() {
+	struct Myfunc {
 
 	},
 
@@ -44,9 +44,9 @@ pub enum Enumlist {
 	Tuple(u8)
 };
 
-b(1, (a+1+a+b) * (2/10));
+test:
 
-test: a;
+	a;
 
 myblock {
  
@@ -62,8 +62,6 @@ if(a) {
 
 	1+2
 }
-
-u8 a,b,c = (char)(b+1);
 
 wholeif:
 
@@ -117,7 +115,9 @@ char c = switch(a) { @1: a * n, @2: a*n, [n,n2]@3,2: a*n*n2  };
 switch(var) {
 	@1: one();
 	@2: two();
-	@3: 
+
+
+	[a,b,c]@3:
 		three();
 		another();
 
@@ -136,8 +136,56 @@ switch(var) {
 
 	@else: 
 		none();
-	@: 
+	@:
 		none();
 	[bindall]@:
 		func(bindall);
 }
+
+for(;;);
+
+for(;;) {
+
+	continue;
+}
+for(;;) {
+
+	break;
+}
+
+for(auto a:a);
+
+
+for(auto v : arr) {
+
+}
+
+
+for(;;v--1, --v++);
+
+c(1)
+a->a(b,c,d)->a.b[2:3:4];
+
+a+1=if(1) test { run(); } += 10 *= 2;
+
+while(cond(arg1(2,3), arg2)) {
+	--*&*yes() -= 2;
+}
+
+
+pub block {
+
+}
+
+pub enum {
+	ENUM1,
+
+	u8 mylambda() pub a {
+		priv:
+		u8 a = 1;
+		u8 b = 2;
+		a + b
+	},
+	ENUM2,
+};
+

@@ -4,19 +4,20 @@ public class Node_Expression extends GenericNode {
 	
 	public enum ExpressionType {
 		NULL,
-		CONDOR,  /* ||           */
-		CONDAND, /* &&           */
-		INCOR,   /* |            */
-		EXOR,    /* ^            */
-		AND,     /* &            */
-		EQUAL,   /* == , !=      */
-		REL,     /* <, >, <=, >= */
-		SHT,     /* <<, >>       */
-		ADD,     /* + , -        */
-		MUL,     /* * , / , %    */
-		CAST,    /* (<type>)     */
-		UNARY,   /* ~ , !        */
-		BLOB     /* Multiple expressions */
+		CONDOR,  /* ||                        */
+		CONDAND, /* &&                        */
+		INCOR,   /* |                         */
+		EXOR,    /* ^                         */
+		AND,     /* &                         */
+		EQUAL,   /* == , !=                   */
+		REL,     /* <, >, <=, >=              */
+		SHT,     /* <<, >>                    */
+		ADD,     /* + , -                     */
+		MUL,     /* * , / , %                 */
+		CAST,    /* (<type>)                  */
+		UNARY,   /* ++, --, ~ , !, +, -, *, & */
+		POST,    /* [:?:?], ++, --, ->        */
+		BLOB     /* Multiple expressions      */
 	}
 	
 	ExpressionType type = ExpressionType.NULL;

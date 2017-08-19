@@ -157,6 +157,8 @@ switch(var) {
 		none();
 	@: /* Also default branch */
 		none();
+	[bindall]@: /* Get whatever value comes by binding */
+		func(bindall);
 }
 
 /*-------*/
@@ -324,19 +326,17 @@ for(auto file : ls) {
 /* TODO */
 /*------*/
 
-/* 1- Review datatypes (slices, generics, ranges, etc.)                       */
-/* 2- Expressions                                                             */
-/* 3- Labels                                                                  */
-/* 4- Add memory specifications (stack, heap, safety, variable binding, etc)  */
-/* 5- Pointers (smart pointers only)                                          */
-/* 6- Add scope                                                               */
-/* 7- Add function overloading                                                */
-/* 8- Add operator overloading                                                */
-/* 9- Add imports                                                             */
-/* 10- Add error handling                                                     */
-/* 11- Add Lambdas                                                            */
-/* 12- Add variadics                                                          */
-/* 13- Add macros                                                             */
-/* 14- Add threads                                                            */
-/* 15- Add attributes                                                         */
-/* 16- Add test system                                                        */
+/* 1- Review datatypes (generics, ranges, etc.)                               */
+/* 2- Add memory specifications (stack, heap, safety, variable binding, etc)  */
+/* 3- Pointers (smart pointers only) (DESIGN)                                 */
+/* 4- Add scope                                                               */
+/* 5- Add function overloading                                                */
+/* 6- Add operator overloading                                                */
+/* 7- Add imports                                                             */
+/* 8- Add error handling                                                      */
+/* 9- Add Lambdas                                                             */
+/* 10- Add variadics                                                          */
+/* 11- Add macros                                                             */
+/* 12- Add threads                                                            */
+/* 13- Add attributes                                                         */
+/* 14- Add test system                                                        */

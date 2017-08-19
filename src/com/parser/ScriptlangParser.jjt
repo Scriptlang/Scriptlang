@@ -52,7 +52,7 @@ SKIP :
 |	"\r"
 }
 
-TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
+TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 {
 	/* Block unit tokens */
 	<LBRACE: "{">
@@ -84,25 +84,28 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<LITERAL_INT_HEX: "0x" (<DIGIT_HEX>)+ (<LITERAL_SUFFIX>)?>
 |	<LITERAL_FLOAT32: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
 |	<LITERAL_FLOAT64: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_BOOL: ("true" | "false")>
+|	<LITERAL_BOOL:    ("true" | "false")>
 
 	/* Keywords */
-|	<FN:     "fn"    > /* Return type void for function declaration  */
-|	<CLASS:  "class" > /* Class declaration                          */
-|	<STRUCT: "struct"> /* Struct declaration                         */
-|	<ENUM:   "enum"  > /* Enum declaration                           */
-|	<PUB:    "pub"   > /* Public modifier                            */
-|	<PRIV:   "priv"  > /* Private modifier                           */
-|	<IF:     "if"    > /* Start of an if statement                   */
-|	<ELSE:   "else"  > /* Start of an else branch of an if statement */
-|	<SWITCH: "switch"> /* Start of a switch statement                */
-|	<FOR:    "for"   > /* Start of a for loop statement              */
-|	<WHILE:  "while" > /* Start of a while loop statement            */
-|	<BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
+|	<FN:       "fn"      > /* Return type void for function declaration                     */
+|	<CLASS:    "class"   > /* Class declaration                                             */
+|	<STRUCT:   "struct"  > /* Struct declaration                                            */
+|	<ENUM:     "enum"    > /* Enum declaration                                              */
+|	<PUB:      "pub"     > /* Public modifier                                               */
+|	<PRIV:     "priv"    > /* Private modifier                                              */
+|	<IF:       "if"      > /* Start of an if statement                                      */
+|	<ELSE:     "else"    > /* Start of an else branch of an if statement                    */
+|	<SWITCH:   "switch"  > /* Start of a switch statement                                   */
+|	<FOR:      "for"     > /* Start of a for loop statement                                 */
+|	<WHILE:    "while"   > /* Start of a while loop statement                               */
+|   <BREAK:    "break"   > /* Break out of a loop                                           */
+|   <CONTINUE: "continue"> /* Jump to the next loop cycle                                   */
+|   <RETURN:   "return"  > /* Return from a block unit                                      */
+|	<BIND:     "@"       > /* Binds an identifier to a pattern (could be an anonymous bind) */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
-|	<#LETTER: ["a"-"z", "A"-"Z", "_"]>
+|	<#LETTER:    ["a"-"z", "A"-"Z", "_"]>
 |	<#DIGIT_BIN: ["0"-"1"]>
 |	<#DIGIT_OCT: ["0"-"7"]>
 |	<#DIGIT_DEC: ["0"-"9"]>
@@ -120,18 +123,24 @@ void _Root() : {}
 void _All() #void : /* Matches any kind of top level construct */
 { Token t = null; }
 {
-	LOOKAHEAD(3) _Identifier() ":" | /* A label               */
-	LOOKAHEAD(2) _BlockUnit()      | /* A block unit -> {...} */ 
+	/* A label */
+	LOOKAHEAD(2) _Identifier() ":" | 
 	
-	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
-	LOOKAHEAD(3) _Expression() #_Expression() ( LOOKAHEAD(2) t = ";" )?
-		{
-			jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
-		} |
-
-	LOOKAHEAD(2) _Statement()   | /* Statements -> if, switch, for, while                           */
-	LOOKAHEAD(2) _Declaration() | /* Declarations -> variables, functions, classes, structs, enums  */
-	_Type_Modifier() ":"          /* An access modifier for the actual top level module             */
+	/* Early declare function to resolve conflict with blockUnit (due to access modifiers) */
+	LOOKAHEAD(3) ( _Type_Modifier() ( _Type_Primitive() | <FN> )? _Identifier() 
+		"(" ( _Declaration_Parameter_List() )? ")" _BlockUnit() ) #_Declaration_Function() |
+	
+	/* A block unit -> {...} */
+	LOOKAHEAD(2) _BlockUnit() |
+	
+	/* Statements -> if, switch, for, while */
+	LOOKAHEAD(2) _Statement() |
+	
+	/* Declarations -> variables, functions, classes, structs, enums */
+	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration() |
+			
+	/* An access modifier for the actual top level module */
+	_Type_Modifier() ":"                               
 }
 
 /**-------------------------**/
@@ -139,64 +148,60 @@ void _All() #void : /* Matches any kind of top level construct */
 /**-------------------------**/
 void _BlockUnit() : {} /* Also known as an independent Compilation Unit / Module */
 {
-    ( _Identifier() )? <LBRACE> ( _All() )* <RBRACE>
+	( ( _Type_Modifier() )? _Identifier() )? ( "[" "]" )? <LBRACE> ( _All() )* <RBRACE>
 }
 
 void _Statement() #void : {} /* Any kind of statement goes here */
 {
-	";"                                                  | /* Just a semicolon     */
-	LOOKAHEAD(2) _Expression_Primary() _Assignment() ";" | /* Assignment statement */
-	LOOKAHEAD(3) _Statement_If()                         | /* If statement         */
-	LOOKAHEAD(3) _Statement_Switch()                     | /* Switch statement     */
-	LOOKAHEAD(3) _Statement_For()                        | /* For statement        */
-	_Statement_While()                                     /* While statement      */
+	";" #_Statement_Empty()              | /* Just a semicolon                         */
+	LOOKAHEAD(3) _Statement_Switch()     | /* Switch statement                         */
+	LOOKAHEAD(3) _Statement_If()         | /* If statement                             */
+	LOOKAHEAD(3) _Statement_For()        | /* For statement                            */
+	LOOKAHEAD(3) _Statement_While()      | /* While statement                          */
+	LOOKAHEAD(2) _Statement_Expression() | /* Assignment statement                     */		
+	_Statement_Flow()                      /* Statement that disturbs the program flow */
 }
 
 void _Declaration() #void : {} /* Any kind of declaration goes here */
 {
-	LOOKAHEAD(2) _Declaration_Variable() | /* Variables   */
-	LOOKAHEAD(2) _Declaration_Function() | /* Functions   */
-	LOOKAHEAD(2) _Declaration_Class()    | /* Classes     */
-	LOOKAHEAD(2) _Declaration_Struct()   | /* Structures  */
-	_Declaration_Enum()                    /* Enumerators */
+	LOOKAHEAD(2) _Declaration_Variable() ";" | /* Variables   */
+	LOOKAHEAD(2) _Declaration_Function()     | /* Functions   */
+	LOOKAHEAD(2) _Declaration_Class() ";"    | /* Classes     */
+	LOOKAHEAD(2) _Declaration_Struct() ";"   | /* Structures  */
+	_Declaration_Enum() ";"                    /* Enumerators */
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _Declaration_Variable() : {} /* Variable declaration: <modif>? <type> <var_name> <assignment>? ; */
+void _Declaration_Variable() : {} /* Variable declaration: <type> <var_name> <assignment>? ; */
 {
-	( _Type_Modifier() )? _Type_Primitive() _Identifier() ( "," _Identifier() )* ( _Assignment() )? ";" 
+	_Type_Primitive() _Identifier() ( LOOKAHEAD(2) "," _Identifier() )* ( LOOKAHEAD(2) _Assignment() )?
 }
 
-void _Declaration_Function() : {} /* Function declaration: <modif>? (<type>|fn)? <IDENTIFIER> (<params>?) { <blockunit> } */
+void _Declaration_Function() : {} /* Function declaration: (<type>|fn)? <IDENTIFIER> (<params>?) { <blockunit> } */
 {
-	( _Type_Modifier() )? ( _Type_Primitive() | <FN> )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
+	( _Type_Primitive() | <FN> )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
 }
 
-void _Declaration_Function_Lambda() : {} /* Function declaration: <modif>? <type> <IDENTIFIER>? (<params>?) { <blockunit> } */
+void _Declaration_Function_Lambda() : {} /* Function declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
 {
-	( _Type_Modifier() )? _Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
+	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" ( LOOKAHEAD(2) _BlockUnit() )?
 }
 
-void _Declaration_Function_Lambda_Nomod() : {} /* Lambda declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
+void _Declaration_Struct() : {} /* Struct declaration: struct <IDENTIFIER> { <declaration>* } ; */
 {
-	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" (LOOKAHEAD(2) _BlockUnit() )?
+	<STRUCT> _Identifier() "{" ( _Declaration() )* "}"
 }
 
-void _Declaration_Struct() : {} /* Struct declaration: <modif>? struct <IDENTIFIER> { <declaration>* } ; */
+void _Declaration_Class() : {} /* Class declaration: class <IDENTIFIER> ( : (<modif>? <IDENTIFIER> , ...)+ )? <blockunit> */
 {
-	( _Type_Modifier() )? <STRUCT> _Identifier() "{" ( _Declaration() )* "}" ";"
+	<CLASS> _Identifier() ( ":" ( LOOKAHEAD(2) ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit()
 }
 
-void _Declaration_Class() : {} /* Class declaration: <modif>? class <IDENTIFIER> ( : (<modif>? <IDENTIFIER> , ...)+ )? <blockunit> */
+void _Declaration_Enum() : {} /* Enum declaration: enum <IDENTIFIER>? { <enumbodylist>  } */
 {
-	( _Type_Modifier() )? <CLASS> _Identifier() ( ":" ( LOOKAHEAD(2) ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit() ";"
-}
-
-void _Declaration_Enum() : {} /* Enum declaration: <modif>? enum <IDENTIFIER>? { <enumbodylist>  } */
-{
-	( _Type_Modifier() )? <ENUM> ( _Identifier() )? "{" ( _Declaration_EnumBody_List() )? "}" ";"
+	<ENUM> ( _Identifier() )? "{" ( _Declaration_EnumBody_List() )? "}"
 }
 
 void _Declaration_EnumBody_List() #void : {} /* Enum body list declaration */
@@ -204,14 +209,14 @@ void _Declaration_EnumBody_List() #void : {} /* Enum body list declaration */
 	( _Declaration_EnumBody() ( "," )? )+
 }
 
-void _Declaration_EnumBody() #void : {} /* Enum body declaration: <enumconstlist> | <struct> | <tuple> | <function>|  */
+void _Declaration_EnumBody() #void : {} /* Enum body declaration: <enumconstlist> | <struct> | <tuple> | <function> |  */
 {	
 	/* An enum can have ... */
 	LOOKAHEAD(3) _Declaration_Tuple()           | /* A named tuple                      */
 	LOOKAHEAD(3) _Declaration_EnumBody_Struct() | /* A struct declaration               */
 	_Declaration_EnumBody_Struct_Bodyless()     | /* A struct without a body            */
 	_Declaration_EnumBody_Const()               | /* A constant identifier              */
-	_Declaration_Function_Lambda_Nomod()          /* A function, which acts as a lambda */
+	_Declaration_Function_Lambda()                /* A function, which acts as a lambda */
 }
 
 void _Declaration_EnumBody_Const() : {} /* Enum body const declaration: <IDENTIFIER> <assignment>?  */
@@ -266,9 +271,18 @@ void _Expression() #void : {}
 	_Expression_Primary() _Assignment()
 }
 
-void _Assignment() : {} /* Assignment: <prim_expr>? = <expr> */
+void _Assignment() : {} /* Assignment: <prim_expr>? <assign_operation> <expr> */
 {
-	( _Expression_Primary() )? "=" _Expression()
+	( LOOKAHEAD(2) _Expression_Primary() )? _Assignment_Operation() _Expression()
+}
+
+void _Assignment_Operation() :
+{ Token t; }
+{
+	( t="=" | t="*=" | t="/=" | t="+=" | t="-=" | t=">>=" | t="<<=" | t="&=" | t="|=" | t="^=" | t="%=" )
+	{
+		jjtThis.setIdentifier(t.image);
+	}
 }
 
 void _Identifier() : /* An identifier. (variable/function name for example) */
@@ -292,11 +306,13 @@ void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean,
 	t = <LITERAL_BOOL>    { jjtThis.setLiteral(t.image, LiteralType.BOOL);    }   /* Boolean             */
 }
 
-/******************************************/
-/**--------------------------------------**/
-/** Lower level *specialised* constructs **/
-/**--------------------------------------**/
-/******************************************/
+/**
+******************************************
+******************************************
+** Lower level *specialised* constructs **
+******************************************
+******************************************
+**/
 
 /**-------------**/
 /** Expressions **/
@@ -381,15 +397,53 @@ void _Expression_Cast() #void :
 
 void _Expression_Unary() #void : {}
 {
-	"~" _Expression_Unary() #_Expression() { jjtn001.setExpr("~",  ExpressionType.UNARY); } |
-	"!" _Expression_Unary() #_Expression() { jjtn002.setExpr("!",  ExpressionType.UNARY); } |
+	"++" _Expression_Unary() #_Expression() { jjtn001.setExpr("++", ExpressionType.UNARY); } |
+	"--" _Expression_Unary() #_Expression() { jjtn002.setExpr("--", ExpressionType.UNARY); } |
+	"~"  _Expression_Unary() #_Expression() { jjtn003.setExpr("~",  ExpressionType.UNARY); } |
+	"!"  _Expression_Unary() #_Expression() { jjtn004.setExpr("!",  ExpressionType.UNARY); } |
+	"+"  _Expression_Unary() #_Expression() { jjtn005.setExpr("+",  ExpressionType.UNARY); } |
+	"-"  _Expression_Unary() #_Expression() { jjtn006.setExpr("-",  ExpressionType.UNARY); } |
+	"*"  _Expression_Unary() #_Expression() { jjtn007.setExpr("*",  ExpressionType.UNARY); } |
+	"&"  _Expression_Unary() #_Expression() { jjtn008.setExpr("&",  ExpressionType.UNARY); } |
+	_Expression_Postfix()
+}
+
+void _Expression_Postfix() #void :
+{ Token t = null, t2 = null, t3 = null, t4 = null; }
+{
 	_Expression_Primary()
+		( LOOKAHEAD(2) (
+				( /* Slice syntax */
+					t = "[" ( _Expression() #_Declaration_Array_Slice_Start() )? 
+						( t2 = ":" ( _Expression() #_Declaration_Array_Slice_End() )?
+						( t3 = ":" ( _Expression() #_Declaration_Array_Slice_Skip() )? )?  )? 
+					t4 = "]"
+				) |
+				
+				/* Calling function syntax */
+				t = "(" _Declaration_Parameter_Caller_List() t2 = ")" |
+				
+				t = "--"              | /* Decrementing             */
+				t = "++"              | /* Incrementing             */
+				t = "." _Identifier() | /* Accessing member         */
+				t = "->" _Identifier()  /* Accessing pointer member */
+					
+		) #_Expression()
+		{
+			jjtn004.setExpr(
+				t.image + 
+					(t2 != null ? t2.image : "") + 
+					(t3 != null ? t3.image : "") + 
+					(t4 != null ? t4.image : ""),  
+				ExpressionType.POST);
+			t = t2 = t3 = t4 = null;
+		} )*
 }
 
 void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) | <blockunit> */
 {
-	_Literal() |
-	LOOKAHEAD(2) _Identifier() ( LOOKAHEAD(2) "(" ( _Declaration_Parameter_Caller_List() ) ")" )? |
+	LOOKAHEAD(2) _Identifier()    |
+	_Literal()                    |
 	"(" _Expression() ")"         |
 	LOOKAHEAD(2) _BlockUnit()     |
 	_Statement_If()               |
@@ -401,6 +455,15 @@ void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identi
 /**------------**/
 /** Statements **/
 /**------------**/
+void _Statement_Expression() : 
+{ Token t = null; }
+{
+	 _Expression() #_Expression() ( LOOKAHEAD(2) _Assignment() )* ( LOOKAHEAD(2) t = ";" )?
+	 {
+		 jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
+	 }
+}
+
 void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|{ <all> }) (else (<blockunit>|{<all>}))? */
 {
 	<IF> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_True()
@@ -412,7 +475,7 @@ void _Statement_Switch() : {} /* Switch statement: switch ( <match>+ ) { <switch
 	<SWITCH> "(" ( ( _Statement_Switch_Match_Single() ( "," )? )+ ) #_Statement_Switch_Match_List() ")" "{" ( LOOKAHEAD(2) _Statement_Switch_Line() ( "," )? )+ #_Statement_Switch_Line_List() "}"
 }
 
-void _Statement_Switch_Line() : {}
+void _Statement_Switch_Line() : {} /* A whole switch line */
 {
 	/* Switch condition list of a single switch line */
 	( _Declaration_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) ) #_Statement_Switch_Match_List() ":"
@@ -429,7 +492,7 @@ void _Statement_Switch_Match_Single() : {} /* What a switch "matching container"
 	_Type_Primitive()              /* A primitive data type */
 }
 
-void _Statement_Switch_Line_Body_Single() #void :
+void _Statement_Switch_Line_Body_Single() #void : /* The body of a single switch line */
 { Token t = null; }
 {	
 	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
@@ -442,14 +505,40 @@ void _Statement_Switch_Line_Body_Single() #void :
 	LOOKAHEAD(2) _Declaration()   /* Declarations -> variables, functions, classes, structs, enums */
 }
 
-void _Statement_For() : {}
+void _Statement_For() : {} /* For statement: for (<declvar> : <expression> | <declvar>*;<expression>?;<expression>?) <blockunit>|<all>|; */
 {
-	_Identifier()
+	<FOR> "("
+		
+		/* Foreach declaration: */
+		( LOOKAHEAD(3) _Declaration_Variable() #_Statement_Foreach_InitBranch() ":" _Expression() #_Expression() |
+
+		/* Normal for declaration: */
+				
+		/* For loop initialization branch */
+		( ( _Declaration_Variable() | _Assignment() ) ( "," )? )* #_Statement_For_InitBranch() ";"
+		
+		/* For loop condition branch */
+		( _Expression() #_Expression() )? ";"
+
+		/* For iteration branch */
+		( _Expression() #_Expression() ( "," )? )* #_Statement_For_IterateBranch() ) ")"
+
+	/* For loop body */
+	( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_For_BodyBranch()
 }
 
-void _Statement_While() : {}
+void _Statement_While() : {} /* While statement: while ( <expression> ) <blockunit>|<all>|; */
 {
-	_Identifier()
+	<WHILE> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_While_BodyBranch()
+}
+
+void _Statement_Flow() : 
+{ Token t; }
+{
+	( t=<CONTINUE> | t=<BREAK> | t=<RETURN> )
+	{
+		jjtThis.setIdentifier(t.image);
+	}
 }
 
 /**-------**/
