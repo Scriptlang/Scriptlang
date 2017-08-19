@@ -80,17 +80,25 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int ELSE = 38;
   /** RegularExpression Id. */
-  int IDENTIFIER = 39;
+  int SWITCH = 39;
   /** RegularExpression Id. */
-  int LETTER = 40;
+  int FOR = 40;
   /** RegularExpression Id. */
-  int DIGIT_BIN = 41;
+  int WHILE = 41;
   /** RegularExpression Id. */
-  int DIGIT_OCT = 42;
+  int BIND = 42;
   /** RegularExpression Id. */
-  int DIGIT_DEC = 43;
+  int IDENTIFIER = 43;
   /** RegularExpression Id. */
-  int DIGIT_HEX = 44;
+  int LETTER = 44;
+  /** RegularExpression Id. */
+  int DIGIT_BIN = 45;
+  /** RegularExpression Id. */
+  int DIGIT_OCT = 46;
+  /** RegularExpression Id. */
+  int DIGIT_DEC = 47;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 48;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -136,14 +144,18 @@ public interface ScriptlangParserConstants {
     "\"priv\"",
     "\"if\"",
     "\"else\"",
+    "\"switch\"",
+    "\"for\"",
+    "\"while\"",
+    "\"@\"",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT_BIN>",
     "<DIGIT_OCT>",
     "<DIGIT_DEC>",
     "<DIGIT_HEX>",
-    "\";\"",
     "\":\"",
+    "\";\"",
     "\",\"",
     "\"(\"",
     "\")\"",

@@ -95,6 +95,10 @@ TOKEN : /* IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! */
 |	<PRIV:   "priv"  > /* Private modifier                           */
 |	<IF:     "if"    > /* Start of an if statement                   */
 |	<ELSE:   "else"  > /* Start of an else branch of an if statement */
+|	<SWITCH: "switch"> /* Start of a switch statement                */
+|	<FOR:    "for"   > /* Start of a for loop statement              */
+|	<WHILE:  "while" > /* Start of a while loop statement            */
+|   <BIND:    "@"    > /* Binds an identifier to a pattern (could be an anonymous bind) */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -116,7 +120,8 @@ void _Root() : {}
 void _All() #void : /* Matches any kind of top level construct */
 { Token t = null; }
 {
-	LOOKAHEAD(2) _BlockUnit()   | /* A block unit -> {...} */ 
+	LOOKAHEAD(3) _Identifier() ":" | /* A label               */
+	LOOKAHEAD(2) _BlockUnit()      | /* A block unit -> {...} */ 
 	
 	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
 	LOOKAHEAD(3) _Expression() #_Expression() ( LOOKAHEAD(2) t = ";" )?
@@ -132,20 +137,19 @@ void _All() #void : /* Matches any kind of top level construct */
 /**-------------------------**/
 /** Higher level constructs **/
 /**-------------------------**/
-void _BlockUnit() : {}
+void _BlockUnit() : {} /* Also known as an independent Compilation Unit / Module */
 {
     ( _Identifier() )? <LBRACE> ( _All() )* <RBRACE>
 }
 
-void _Statement() #void : {}
+void _Statement() #void : {} /* Any kind of statement goes here */
 {
-	";" |
-	LOOKAHEAD(3) _Statement_Labeled()                    |
-	LOOKAHEAD(2) _Expression_Primary() _Assignment() ";" |
-	LOOKAHEAD(3) _Statement_If()                         |
-	LOOKAHEAD(3) _Statement_Switch()                     | 
-	LOOKAHEAD(3) _Statement_For()                        |
-	_Statement_While()                  
+	";"                                                  | /* Just a semicolon     */
+	LOOKAHEAD(2) _Expression_Primary() _Assignment() ";" | /* Assignment statement */
+	LOOKAHEAD(3) _Statement_If()                         | /* If statement         */
+	LOOKAHEAD(3) _Statement_Switch()                     | /* Switch statement     */
+	LOOKAHEAD(3) _Statement_For()                        | /* For statement        */
+	_Statement_While()                                     /* While statement      */
 }
 
 void _Declaration() #void : {} /* Any kind of declaration goes here */
@@ -230,6 +234,11 @@ void _Declaration_Tuple() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<t
 	( _Identifier() )? "(" ( _Declaration_TypeList() )+ ")"
 }
 
+void _Declaration_Tuple_Identifier_Only() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <type>, ...) */
+{
+	"(" ( ( _Identifier() | _Declaration_Tuple_Identifier_Only() ) ( "," )? )+ ")"
+}
+
 void _Declaration_TypeList() : {} /* Type list declaration: <type>, <type>, <type>, ... */
 {
 	(LOOKAHEAD(2) _Type_Primitive() ( "," )? )+
@@ -293,65 +302,70 @@ void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean,
 /**-------------**/
 void _Expression_CondOr() #void : {}
 {
-	_Expression_CondAnd() ( "||" _Expression_CondAnd() #_Expression() { jjtn001.setExpr("||", ExpressionType.CONDOR); } )*
+	_Expression_CondAnd() ( LOOKAHEAD(2) "||" _Expression_CondAnd() #_Expression() { jjtn001.setExpr("||", ExpressionType.CONDOR); } )*
 }
 
 void _Expression_CondAnd() #void : {}
 {
-	_Expression_IncOr() ( "&&" _Expression_IncOr() #_Expression() { jjtn001.setExpr("&&", ExpressionType.CONDAND); } )*
+	_Expression_IncOr() ( LOOKAHEAD(2) "&&" _Expression_IncOr() #_Expression() { jjtn001.setExpr("&&", ExpressionType.CONDAND); } )*
 }
 
 void _Expression_IncOr() #void : {}
 {
-	_Expression_ExOr() ( "|" _Expression_ExOr() #_Expression() { jjtn001.setExpr("|", ExpressionType.INCOR); } )*
+	_Expression_ExOr() ( LOOKAHEAD(2) "|" _Expression_ExOr() #_Expression() { jjtn001.setExpr("|", ExpressionType.INCOR); } )*
 }
 
 void _Expression_ExOr() #void : {}
 {
-	_Expression_And() ( "^" _Expression_And() #_Expression() { jjtn001.setExpr("^", ExpressionType.EXOR); } )*
+	_Expression_And() ( LOOKAHEAD(2) "^" _Expression_And() #_Expression() { jjtn001.setExpr("^", ExpressionType.EXOR); } )*
 }
 
 void _Expression_And() #void : {}
 {
-	_Expression_Equal() ( "&" _Expression_Equal() #_Expression() { jjtn001.setExpr("&", ExpressionType.AND); } )*
+	_Expression_Equal() ( LOOKAHEAD(2) "&" _Expression_Equal() #_Expression() { jjtn001.setExpr("&", ExpressionType.AND); } )*
 }
 
 void _Expression_Equal() #void : {}
 {
 	_Expression_Relational()
-	( "==" _Expression_Relational() #_Expression() { jjtn001.setExpr("==", ExpressionType.EQUAL); } |
-      "!=" _Expression_Relational() #_Expression() { jjtn002.setExpr("!=", ExpressionType.EQUAL); } )*
+	( LOOKAHEAD(2)
+	  ( "==" _Expression_Relational() #_Expression() { jjtn001.setExpr("==", ExpressionType.EQUAL); } |
+        "!=" _Expression_Relational() #_Expression() { jjtn002.setExpr("!=", ExpressionType.EQUAL); } ) )*
 }
 
 void _Expression_Relational() #void : {}
 {
 	_Expression_Shift() 
-	( "<"  _Expression_Shift() #_Expression() { jjtn001.setExpr("<",  ExpressionType.REL); } | 
-	  ">"  _Expression_Shift() #_Expression() { jjtn002.setExpr(">",  ExpressionType.REL); } | 
-	  "<=" _Expression_Shift() #_Expression() { jjtn003.setExpr("<=", ExpressionType.REL); } | 
-	  ">=" _Expression_Shift() #_Expression() { jjtn004.setExpr(">=", ExpressionType.REL); } )*
+	( LOOKAHEAD(2)
+	  ( "<"  _Expression_Shift() #_Expression() { jjtn001.setExpr("<",  ExpressionType.REL); } | 
+	    ">"  _Expression_Shift() #_Expression() { jjtn002.setExpr(">",  ExpressionType.REL); } | 
+	    "<=" _Expression_Shift() #_Expression() { jjtn003.setExpr("<=", ExpressionType.REL); } | 
+	    ">=" _Expression_Shift() #_Expression() { jjtn004.setExpr(">=", ExpressionType.REL); } ) )*
 }
 
 void _Expression_Shift() #void : {}
 {
 	_Expression_Additive() 
-	( "<<"  _Expression_Additive() #_Expression() { jjtn001.setExpr("<<",  ExpressionType.SHT); } | 
-	  ">>"  _Expression_Additive() #_Expression() { jjtn002.setExpr(">>",  ExpressionType.SHT); } )*
+	( LOOKAHEAD(2)
+	  ( "<<"  _Expression_Additive() #_Expression() { jjtn001.setExpr("<<",  ExpressionType.SHT); } | 
+	    ">>"  _Expression_Additive() #_Expression() { jjtn002.setExpr(">>",  ExpressionType.SHT); } ) )*
 }
 
 void _Expression_Additive() #void : {}
 {
 	_Expression_Multiplicative()
-	( "+" _Expression_Multiplicative() #_Expression() { jjtn001.setExpr("+",  ExpressionType.ADD); } |
-      "-" _Expression_Multiplicative() #_Expression() { jjtn002.setExpr("-",  ExpressionType.ADD); } )*
+	( LOOKAHEAD(2)
+	  ( "+" _Expression_Multiplicative() #_Expression() { jjtn001.setExpr("+",  ExpressionType.ADD); } |
+        "-" _Expression_Multiplicative() #_Expression() { jjtn002.setExpr("-",  ExpressionType.ADD); } ) )*
 }
 
 void _Expression_Multiplicative() #void : {}
 {
 	_Expression_Cast()
-	( "*" _Expression_Cast() #_Expression() { jjtn001.setExpr("*",  ExpressionType.MUL); } |
-      "/" _Expression_Cast() #_Expression() { jjtn002.setExpr("/",  ExpressionType.MUL); } |
-	  "%" _Expression_Cast() #_Expression() { jjtn003.setExpr("%",  ExpressionType.MUL); } )*
+	( LOOKAHEAD(2)
+	  ( "*" _Expression_Cast() #_Expression() { jjtn001.setExpr("*",  ExpressionType.MUL); } |
+        "/" _Expression_Cast() #_Expression() { jjtn002.setExpr("/",  ExpressionType.MUL); } |
+	    "%" _Expression_Cast() #_Expression() { jjtn003.setExpr("%",  ExpressionType.MUL); } ) )*
 }
 
 void _Expression_Cast() #void :
@@ -371,41 +385,75 @@ void _Expression_Unary() #void : {}
 	_Expression_Primary()
 }
 
-void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) */
+void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) | <blockunit> */
 {
 	_Literal() |
 	LOOKAHEAD(2) _Identifier() ( LOOKAHEAD(2) "(" ( _Declaration_Parameter_Caller_List() ) ")" )? |
-	"(" _Expression() ")" |
-	_BlockUnit()
+	"(" _Expression() ")"         |
+	LOOKAHEAD(2) _BlockUnit()     |
+	_Statement_If()               |
+	_Statement_Switch()           |
+	LOOKAHEAD(2) _Statement_For() |
+	_Statement_While()
 }
 
 /**------------**/
 /** Statements **/
 /**------------**/
-void _Statement_Labeled() : {}
-{
-	_Identifier() ":" _Statement()
-}
-
 void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|{ <all> }) (else (<blockunit>|{<all>}))? */
 {
 	<IF> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_True()
 	( LOOKAHEAD(2) <ELSE> ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_False() )?
 }
 
-void _Statement_Switch() : {}
+void _Statement_Switch() : {} /* Switch statement: switch ( <match>+ ) { <switchline>+ } */
 {
-	_Identifier() ":" _Statement()
+	<SWITCH> "(" ( ( _Statement_Switch_Match_Single() ( "," )? )+ ) #_Statement_Switch_Match_List() ")" "{" ( LOOKAHEAD(2) _Statement_Switch_Line() ( "," )? )+ #_Statement_Switch_Line_List() "}"
+}
+
+void _Statement_Switch_Line() : {}
+{
+	/* Switch condition list of a single switch line */
+	( _Statement_Switch_Pattern_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) ) #_Statement_Switch_Match_List() ":"
+	
+	/* Switch body list of a single switch line */
+	( LOOKAHEAD(3) _BlockUnit() #_Statement_Switch_Line_Body_List() |
+	( LOOKAHEAD(2) _Statement_Switch_Line_Body_Single() )+ #_Statement_Switch_Line_Body_List() )
+}
+
+void _Statement_Switch_Match_Single() : {} /* What a switch "matching container" / "line condition" can be matched against */
+{
+	/* Can be matched against... */
+	_Expression() #_Expression() | /* An expression         */
+	_Type_Primitive()              /* A primitive data type */
+}
+
+void _Statement_Switch_Line_Body_Single() #void :
+{ Token t = null; }
+{	
+	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
+	LOOKAHEAD(3) ( _Expression() ( LOOKAHEAD(2) t = ";" )? ) #_Expression()
+		{
+			jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
+		} |
+
+	LOOKAHEAD(3) _Statement()   | /* Statements -> if, switch, for, while                          */
+	LOOKAHEAD(2) _Declaration()   /* Declarations -> variables, functions, classes, structs, enums */
+}
+
+void _Statement_Switch_Pattern_Bind() : {}
+{
+	( _Identifier() | _Declaration_Tuple_Identifier_Only() )? <BIND>
 }
 
 void _Statement_For() : {}
 {
-	_Identifier() ":" _Statement()
+	_Identifier()
 }
 
 void _Statement_While() : {}
 {
-	_Identifier() ":" _Statement()
+	_Identifier()
 }
 
 /**-------**/

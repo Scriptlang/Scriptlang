@@ -133,7 +133,31 @@ auto v4 = (v2 == 30) ? {
 /********************/
 /* SWITCH STATEMENT */
 /********************/
-/* TODO */
+switch(var) {
+	@1: one();
+	@2: two();
+	@3: 
+		three();
+		another();
+
+	@4: { /* Curly braces optional */
+		four();
+		another();
+	}
+	@5,6,7:
+		five();
+		six();
+		seven();
+
+	@u8: isU8(); /* Is var of type u8 */
+
+	@equalto(): lambdaMatch(); /* Match var's value against equalto() return value */
+
+	@else: /* Default branch */
+		none();
+	@: /* Also default branch */
+		none();
+}
 
 /*-------*/
 /* LOOPS */
@@ -300,7 +324,7 @@ for(auto file : ls) {
 /* TODO */
 /*------*/
 
-/* 1- Review datatypes (slices, generics, etc.)                               */
+/* 1- Review datatypes (slices, generics, ranges, etc.)                       */
 /* 2- Expressions                                                             */
 /* 3- Labels                                                                  */
 /* 4- Add memory specifications (stack, heap, safety, variable binding, etc)  */
