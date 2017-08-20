@@ -46,10 +46,40 @@ PARSER_END(ScriptlangParser) /** ScriptLangParser Class - END **/
 /**--------------------**/
 SKIP :
 {
-	" "
-|	"\t"
-|	"\n"
-|	"\r"
+	" "  |
+	"\t" |
+	"\n" |
+	"\r"
+}
+
+/**----------**/
+/** COMMENTS **/
+/**----------**/
+MORE :
+{
+	"//" : IN_SINGLE_LINE_COMMENT                                      |
+	< "/**" ~[ "/" ] > { input_stream.backup(1); } : IN_FORMAL_COMMENT |
+	"/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN :
+{
+	<SINGLE_LINE_COMMENT: ( ~[ "\n", "\r" ] )* ( "\n" | "\r" | "\r\n" )? > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT> SPECIAL_TOKEN :
+{
+	<FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT> SPECIAL_TOKEN :
+{
+	<MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT, IN_FORMAL_COMMENT, IN_MULTI_LINE_COMMENT> MORE :
+{
+	< ~[] >
 }
 
 TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
@@ -59,22 +89,24 @@ TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 |	<RBRACE: "}">
 
 	/* Primitive data types */
-|	<U8:    "u8"   >
-|	<U16:   "u16"  >
-|	<U32:   "u32"  >
-|	<U64:   "u64"  >
-|	<I8:    "i8"   >
-|	<I16:   "i16"  >
-|	<I32:   "i32"  >
-|	<I64:   "i64"  >
-|	<F32:   "f32"  >
-|	<F64:   "f64"  >
-|	<BOOL:  "bool" >
-|	<CHAR:  "char" >
-|	<USIZE: "usize">
-|	<ISIZE: "isize">
-|	<AUTO:  "auto" >
-|   <ARRAY: "array">
+|	<U8:     "u8"     >
+|	<U16:    "u16"    >
+|	<U32:    "u32"    >
+|	<U64:    "u64"    >
+|	<I8:     "i8"     >
+|	<I16:    "i16"    >
+|	<I32:    "i32"    >
+|	<I64:    "i64"    >
+|	<F32:    "f32"    >
+|	<F64:    "f64"    >
+|	<BOOL:   "bool"   >
+|	<CHAR:   "char"   >
+|	<STRING: "string" >
+|	<USIZE:  "usize"  >
+|	<ISIZE:  "isize"  >
+|	<AUTO:   "auto"   >
+|   <ARRAY:  "array"  >
+|   <TYPE:   "type"   >
 |   <LITERAL_SUFFIX: ("i" | "u" | "f" | "uz" | "iz") (<DIGIT_DEC>)+>
 
 	/* Literals */
@@ -105,6 +137,29 @@ TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
+|	<CHARACTER_LITERAL:
+		"'"
+		( (~["'","\\","\n","\r"]) |
+			("\\"
+				( ["n","t","b","r","f","\\","'","\""] |
+				  ["0"-"7"] ( ["0"-"7"] )? |
+				  ["0"-"3"] ["0"-"7"] ["0"-"7"]
+				)
+			)
+		)
+		"'"
+>
+|	<STRING_LITERAL:
+		"\""
+		( (~["\"","\\","\n","\r"]) |
+			("\\"
+				( ["n","t","b","r","f","\\","'","\""] |
+				  ["0"-"7"] ( ["0"-"7"] )? |
+				  ["0"-"3"] ["0"-"7"] ["0"-"7"]
+				)
+			)
+		)*
+		"\"">
 |	<#LETTER:    ["a"-"z", "A"-"Z", "_"]>
 |	<#DIGIT_BIN: ["0"-"1"]>
 |	<#DIGIT_OCT: ["0"-"7"]>
@@ -125,20 +180,29 @@ void _All() #void : /* Matches any kind of top level construct */
 {
 	/* A label */
 	LOOKAHEAD(2) _Identifier() ":" | 
+
+	/* Early declare primitive variables
+	 * (REASON: when declaring duples the parser thinks the tuple type is an expression,
+	 *  thus, we'll declare variables with tuple types before statements) */
+	LOOKAHEAD(3) ( ( _Type_Modifier() )? _Type_Primitive_Tuple_TypesOnly() _Identifier() ( LOOKAHEAD(2) "," _Identifier() )* ( LOOKAHEAD(2) _Assignment() )? ) #_Declaration_Variable() ";" |
 	
 	/* Early declare function to resolve conflict with blockUnit (due to access modifiers) */
-	LOOKAHEAD(3) ( _Type_Modifier() ( _Type_Primitive() | <FN> )? _Identifier() 
+	LOOKAHEAD(3) ( _Type_Modifier() ( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? _Identifier() 
 		"(" ( _Declaration_Parameter_List() )? ")" _BlockUnit() ) #_Declaration_Function() |
 	
 	/* A block unit -> {...} */
-	LOOKAHEAD(2) _BlockUnit() |
+	LOOKAHEAD(4) _BlockUnit() |
+
+	/* An object (of a class) */
+	LOOKAHEAD(3) ( _Declaration_Object() _Declaration_VarObj_List() ) #_Declaration_Object() |
+	//LOOKAHEAD(3) ( LOOKAHEAD(2) ( LOOKAHEAD(7) ( ( _Identifier() #_Expression() ) #_Statement_Expression() ) | _Declaration_Object() ";" ) )+  |
 	
 	/* Statements -> if, switch, for, while */
 	LOOKAHEAD(2) _Statement() |
 	
 	/* Declarations -> variables, functions, classes, structs, enums */
-	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration() |
-			
+	LOOKAHEAD(2) _Declaration() |
+
 	/* An access modifier for the actual top level module */
 	_Type_Modifier() ":"                               
 }
@@ -164,11 +228,11 @@ void _Statement() #void : {} /* Any kind of statement goes here */
 
 void _Declaration() #void : {} /* Any kind of declaration goes here */
 {
-	LOOKAHEAD(2) _Declaration_Variable() ";" | /* Variables   */
-	LOOKAHEAD(2) _Declaration_Function()     | /* Functions   */
-	LOOKAHEAD(2) _Declaration_Class() ";"    | /* Classes     */
-	LOOKAHEAD(2) _Declaration_Struct() ";"   | /* Structures  */
-	_Declaration_Enum() ";"                    /* Enumerators */
+	LOOKAHEAD(2) _Declaration_Variable() _Declaration_VarObj_List() ";" | /* Variables   */
+	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Function()          | /* Functions   */
+	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Class() ";"         | /* Classes     */
+	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Struct() ";"        | /* Structures  */
+	( _Type_Modifier() )? _Declaration_Enum() ";"                         /* Enumerators */
 }
 
 /**----------------------------------**/
@@ -176,12 +240,23 @@ void _Declaration() #void : {} /* Any kind of declaration goes here */
 /**----------------------------------**/
 void _Declaration_Variable() : {} /* Variable declaration: <type> <var_name> <assignment>? ; */
 {
-	_Type_Primitive() _Identifier() ( LOOKAHEAD(2) "," _Identifier() )* ( LOOKAHEAD(2) _Assignment() )?
+	( _Type_Modifier() )? _Type_Primitive() _Identifier()
 }
 
-void _Declaration_Function() : {} /* Function declaration: (<type>|fn)? <IDENTIFIER> (<params>?) { <blockunit> } */
+void _Declaration_Object() #void : {} /* Variable object declaration: <class> <obj_name> <assignment>? ; */
 {
-	( _Type_Primitive() | <FN> )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
+	( _Type_Modifier() )? _Identifier() #_Type_Primitive() _Identifier()
+}
+
+void _Declaration_VarObj_List() : {}
+{
+	( LOOKAHEAD(2) "," ( _Identifier() ( LOOKAHEAD(2) ( _Assignment_Operation() _Expression() #_Expression() ) #_Assignment() )? ) #_Declaration_VarObj_Single() )*
+	( ";" | ( _Assignment_Operation() _Expression() #_Expression() ) #_Declaration_VarObj_Single() )
+}
+
+void _Declaration_Function() : {} /* Function declaration: (<type>|fn)? <IDENTIFIER> (<params>?) <blockunit> */
+{
+	( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
 }
 
 void _Declaration_Function_Lambda() : {} /* Function declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
@@ -212,14 +287,14 @@ void _Declaration_EnumBody_List() #void : {} /* Enum body list declaration */
 void _Declaration_EnumBody() #void : {} /* Enum body declaration: <enumconstlist> | <struct> | <tuple> | <function> |  */
 {	
 	/* An enum can have ... */
-	LOOKAHEAD(3) _Declaration_Tuple()           | /* A named tuple                      */
-	LOOKAHEAD(3) _Declaration_EnumBody_Struct() | /* A struct declaration               */
-	_Declaration_EnumBody_Struct_Bodyless()     | /* A struct without a body            */
-	_Declaration_EnumBody_Const()               | /* A constant identifier              */
-	_Declaration_Function_Lambda()                /* A function, which acts as a lambda */
+	LOOKAHEAD(3) _Declaration_Tuple_Named()     | /* A named tuple (or anonymous) with types and expression */
+	LOOKAHEAD(3) _Declaration_EnumBody_Struct() | /* A struct declaration                                   */
+	_Declaration_EnumBody_Struct_Bodyless()     | /* A struct without a body                                */
+	LOOKAHEAD(3) _Declaration_EnumBody_Const()  | /* A constant identifier                                  */
+	_Declaration_Function_Lambda()                /* A function, which acts as a lambda                     */
 }
 
-void _Declaration_EnumBody_Const() : {} /* Enum body const declaration: <IDENTIFIER> <assignment>?  */
+void _Declaration_EnumBody_Const() : {} /* Enum body const declaration: <IDENTIFIER> <assignment>? */
 {
 	_Identifier() ( LOOKAHEAD(2) _Assignment() )?
 }
@@ -234,9 +309,9 @@ void _Declaration_EnumBody_Struct_Bodyless() : {} /* Enum body struct declaratio
 	<STRUCT> _Identifier()
 }
 
-void _Declaration_Tuple() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <type>, ...) */
+void _Declaration_Tuple_Named() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <expression>, <type>, ...) */
 {
-	( _Identifier() )? "(" ( _Declaration_TypeList() )+ ")"
+	( _Identifier() )? "(" ( ( LOOKAHEAD(3)  _Expression() | _Type_Primitive() ) #_Declaration_Tuple_Named_Arg() ( "," )? )+ ")"
 }
 
 void _Declaration_Bind() : {} /* Bind declaration: <IDENTIFIER>? | [<IDENTIFIER>,? <IDENTIFIER>,? ...] @ */
@@ -257,12 +332,17 @@ void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <I
 
 void _Declaration_Parameter_Single() : {} /* Declaration of a single function argument: <type> <IDENTIFIER> */
 {
-	_Type_Primitive() ( _Identifier() )?
+	_Type_Primitive() ( LOOKAHEAD(2) _Identifier() )?
 }
 
 void _Declaration_Parameter_Caller_List() : {} /* Parameter list declaration: <IDENTIFIER>, <expression>, <IDENTIFIER>, ... */
 {
 	( _Expression() #_Declaration_Parameter_Caller_Single() ( "," )? )*
+}
+
+void _Declaration_Array() : {}
+{
+	( LOOKAHEAD(2) ( _Expression() #_Expression() ) #_Declaration_Array_Arg() ( "," ( LOOKAHEAD(2) _Expression() #_Expression() )? #_Declaration_Array_Arg() )* )+	
 }
 
 void _Expression() #void : {}
@@ -273,7 +353,7 @@ void _Expression() #void : {}
 
 void _Assignment() : {} /* Assignment: <prim_expr>? <assign_operation> <expr> */
 {
-	( LOOKAHEAD(2) _Expression_Primary() )? _Assignment_Operation() _Expression()
+	( LOOKAHEAD(2) _Expression_Primary() )? _Assignment_Operation() _Expression() #_Expression()
 }
 
 void _Assignment_Operation() :
@@ -297,13 +377,15 @@ void _Identifier() : /* An identifier. (variable/function name for example) */
 void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean, char and string) */
 { Token t; }
 {
-	t = <LITERAL_INT_BIN> { jjtThis.setLiteral(t.image, LiteralType.INT_BIN); } | /* Binary integer      */
-	t = <LITERAL_INT_OCT> { jjtThis.setLiteral(t.image, LiteralType.INT_OCT); } | /* Octal integer       */
-	t = <LITERAL_INT_DEC> { jjtThis.setLiteral(t.image, LiteralType.INT_DEC); } | /* Decimal integer     */
-	t = <LITERAL_INT_HEX> { jjtThis.setLiteral(t.image, LiteralType.INT_HEX); } | /* Hexadecimal integer */
-	t = <LITERAL_FLOAT32> { jjtThis.setLiteral(t.image, LiteralType.FLOAT32); } | /* 32-bit float        */
-	t = <LITERAL_FLOAT64> { jjtThis.setLiteral(t.image, LiteralType.FLOAT64); } | /* 64-bit float        */
-	t = <LITERAL_BOOL>    { jjtThis.setLiteral(t.image, LiteralType.BOOL);    }   /* Boolean             */
+	t = <LITERAL_INT_BIN>   { jjtThis.setLiteral(t.image, LiteralType.INT_BIN); } | /* Binary integer      */
+	t = <LITERAL_INT_OCT>   { jjtThis.setLiteral(t.image, LiteralType.INT_OCT); } | /* Octal integer       */
+	t = <LITERAL_INT_DEC>   { jjtThis.setLiteral(t.image, LiteralType.INT_DEC); } | /* Decimal integer     */
+	t = <LITERAL_INT_HEX>   { jjtThis.setLiteral(t.image, LiteralType.INT_HEX); } | /* Hexadecimal integer */
+	t = <LITERAL_FLOAT32>   { jjtThis.setLiteral(t.image, LiteralType.FLOAT32); } | /* 32-bit float        */
+	t = <LITERAL_FLOAT64>   { jjtThis.setLiteral(t.image, LiteralType.FLOAT64); } | /* 64-bit float        */
+	t = <LITERAL_BOOL>      { jjtThis.setLiteral(t.image, LiteralType.BOOL);    } | /* Boolean             */
+	t = <CHARACTER_LITERAL> { jjtThis.setLiteral(t.image, LiteralType.CHAR);    } | /* Character           */
+	t = <STRING_LITERAL>    { jjtThis.setLiteral(t.image, LiteralType.STRING);  }   /* String              */
 }
 
 /**
@@ -388,9 +470,9 @@ void _Expression_Multiplicative() #void : {}
 void _Expression_Cast() #void :
 { Token t; }
 {
-	LOOKAHEAD(2) "(" t = _Type_Suffix() ")" _Expression_Unary() #_Expression()
+	LOOKAHEAD(3) "(" t = _Type_Suffix() ")" ( LOOKAHEAD(2) _Expression_Unary() )? #_Expression()
 	{
-		jjtn001.setExpr("(" + t.image + ")",  ExpressionType.CAST);
+		jjtn001.setExpr("(" + t.image + ")", ExpressionType.CAST);
 	} |
 	_Expression_Unary()
 }
@@ -442,14 +524,21 @@ void _Expression_Postfix() #void :
 
 void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) | <blockunit> */
 {
-	LOOKAHEAD(2) _Identifier()    |
-	_Literal()                    |
-	"(" _Expression() ")"         |
-	LOOKAHEAD(2) _BlockUnit()     |
-	_Statement_If()               |
-	_Statement_Switch()           |
-	LOOKAHEAD(2) _Statement_For() |
+	LOOKAHEAD(2) _Identifier()                     |
+	LOOKAHEAD(2) _Literal()                        |
+	LOOKAHEAD(3) "(" _Expression_Wrapped() ")"     |
+	LOOKAHEAD(3) "[" ( _Declaration_Array() )* "]" |
+	LOOKAHEAD(2) _Type_Primitive()                 |
+	LOOKAHEAD(2) _BlockUnit()                      |
+	_Statement_If()                                |
+	_Statement_Switch()                            |
+	LOOKAHEAD(2) _Statement_For()                  |
 	_Statement_While()
+}
+
+void _Expression_Wrapped() : {}
+{
+	( LOOKAHEAD(2) ( _Expression() #_Expression() ) #_Declaration_Tuple_Arg() ( "," ( LOOKAHEAD(2) _Expression() #_Expression() )? #_Declaration_Tuple_Arg() )* )+
 }
 
 /**------------**/
@@ -459,9 +548,9 @@ void _Statement_Expression() :
 { Token t = null; }
 {
 	 _Expression() #_Expression() ( LOOKAHEAD(2) _Assignment() )* ( LOOKAHEAD(2) t = ";" )?
-	 {
-		 jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
-	 }
+	{
+		jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
+	}
 }
 
 void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|{ <all> }) (else (<blockunit>|{<all>}))? */
@@ -488,8 +577,8 @@ void _Statement_Switch_Line() : {} /* A whole switch line */
 void _Statement_Switch_Match_Single() : {} /* What a switch "matching container" / "line condition" can be matched against */
 {
 	/* Can be matched against... */
-	_Expression() #_Expression() | /* An expression         */
-	_Type_Primitive()              /* A primitive data type */
+	LOOKAHEAD(3) _Expression() #_Expression() | /* An expression         */
+	_Type_Primitive()                           /* A primitive data type */
 }
 
 void _Statement_Switch_Line_Body_Single() #void : /* The body of a single switch line */
@@ -508,14 +597,13 @@ void _Statement_Switch_Line_Body_Single() #void : /* The body of a single switch
 void _Statement_For() : {} /* For statement: for (<declvar> : <expression> | <declvar>*;<expression>?;<expression>?) <blockunit>|<all>|; */
 {
 	<FOR> "("
-		
+
 		/* Foreach declaration: */
 		( LOOKAHEAD(3) _Declaration_Variable() #_Statement_Foreach_InitBranch() ":" _Expression() #_Expression() |
 
-		/* Normal for declaration: */
-				
+		/* Normal for declaration:        */
 		/* For loop initialization branch */
-		( ( _Declaration_Variable() | _Assignment() ) ( "," )? )* #_Statement_For_InitBranch() ";"
+		( ( LOOKAHEAD(3) _Declaration_Variable() | _Assignment() ) ( "," )? )* #_Statement_For_InitBranch() ";"
 		
 		/* For loop condition branch */
 		( _Expression() #_Expression() )? ";"
@@ -545,25 +633,40 @@ void _Statement_Flow() :
 /** Types **/
 /**-------**/
 void _Type_Primitive() : /* All primitive data types are declared here */
-{ Token t; }
+{ Token t = null; }
 {
-	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>  |
-	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>  |
-	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR> |
-	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY> )
+	_Type_Primitive_Tuple()  |
+	( t=<U8>     | t=<U16>   | t=<U32>  | t=<U64>   |
+	  t=<I8>     | t=<I16>   | t=<I32>  | t=<I64>   |
+	  t=<F32>    | t=<F64>   | t=<BOOL> | t=<CHAR>  |
+	  t=<STRING> | t=<USIZE> | t=<ISIZE>| t=<ARRAY> |
+	  t=<AUTO>   | t=<TYPE> )
 	{
-		jjtThis.setTypePrimitive(t.image, TypePrimitive.values()[t.kind - U8 + 1]);
+		if(t != null)
+			jjtThis.setTypePrimitive(t.image, TypePrimitive.values()[t.kind - U8 + 1]);
 	}
+}
+
+void _Type_Primitive_Tuple() :
+{}
+{
+	"(" ( LOOKAHEAD(2) ( LOOKAHEAD(3) _Type_Primitive() | _Expression() ) ( LOOKAHEAD(2) "," )? )* ")"
+}
+
+void _Type_Primitive_Tuple_TypesOnly() :
+{}
+{
+	"(" ( LOOKAHEAD(2) _Type_Primitive() ( LOOKAHEAD(2) "," )? )* ")"
 }
 
 Token _Type_Suffix() #void : /* Supported data type suffixes */
 { Token t; }
 {
-	( t=<U8>    | t=<U16>   | t=<U32>  | t=<U64>   |
-	  t=<I8>    | t=<I16>   | t=<I32>  | t=<I64>   |
-	  t=<F32>   | t=<F64>   | t=<BOOL> | t=<CHAR>  |
-	  t=<USIZE> | t=<ISIZE> | t=<AUTO> | t=<ARRAY> |
-	  t=<LITERAL_SUFFIX> )
+	( t=<U8>     | t=<U16>  | t=<U32>   | t=<U64>   |
+	  t=<I8>     | t=<I16>  | t=<I32>   | t=<I64>   |
+	  t=<F32>    | t=<F64>  | t=<BOOL>  | t=<CHAR>  |
+	  t=<STRING> |t=<USIZE> | t=<ISIZE> | t=<ARRAY> |
+	  t=<AUTO>   | t=<TYPE> | t=<LITERAL_SUFFIX> )
 	{
 		return t;
 	}

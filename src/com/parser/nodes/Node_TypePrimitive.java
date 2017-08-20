@@ -7,10 +7,11 @@ public class Node_TypePrimitive extends GenericNode {
 	/**---------------------------------------------**/
 	public enum TypePrimitive {
 		NULL,
-		U8,    U16,   U32,   U64,
-		I8,    I16,   I32,   I64,
-		F32,   F64,   BOOL,  CHAR,
-		USIZE, ISIZE, ARRAY, AUTO,
+		U8,     U16,   U32,   U64,
+		I8,     I16,   I32,   I64,
+		F32,    F64,   BOOL,  CHAR,
+		STRING, USIZE, ISIZE, ARRAY,
+		AUTO,   TYPE
 	}
 	
 	/* TODO Add types: tuple and class objects */

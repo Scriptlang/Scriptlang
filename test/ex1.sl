@@ -3,7 +3,7 @@ fn foo(u8, u16 a) {
 }
 
 struct a {
-	char a = 1;
+	pub char a = 1;
 };
 
 class Myclass : pub a, priv b {
@@ -187,5 +187,32 @@ pub enum {
 		a + b
 	},
 	ENUM2,
+	tup(1,u8)
 };
 
+char c = (u8)1;
+
+a=(u8, 1+2,2)a;
+
+pub (type, type) t = (u8,(u8,1,true));
+
+string a += "1".a;
+
+array b = [(u8,u64), (u16), (["a",'a',1], ("1",1), [u8,""],' ')];
+
+char c[10][[]] = [1,[]];
+
+//aa
+// a
+/*aa*/
+
+/** a **/
+
+//if(a)
+//a
+
+a
+Test a;
+A c, d = 1;
+
+(char,char) c = 0;

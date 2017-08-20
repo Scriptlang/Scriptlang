@@ -12,102 +12,122 @@ public interface ScriptlangParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int LBRACE = 5;
+  int SINGLE_LINE_COMMENT = 8;
   /** RegularExpression Id. */
-  int RBRACE = 6;
+  int FORMAL_COMMENT = 9;
   /** RegularExpression Id. */
-  int U8 = 7;
+  int MULTI_LINE_COMMENT = 10;
   /** RegularExpression Id. */
-  int U16 = 8;
+  int LBRACE = 12;
   /** RegularExpression Id. */
-  int U32 = 9;
+  int RBRACE = 13;
   /** RegularExpression Id. */
-  int U64 = 10;
+  int U8 = 14;
   /** RegularExpression Id. */
-  int I8 = 11;
+  int U16 = 15;
   /** RegularExpression Id. */
-  int I16 = 12;
+  int U32 = 16;
   /** RegularExpression Id. */
-  int I32 = 13;
+  int U64 = 17;
   /** RegularExpression Id. */
-  int I64 = 14;
+  int I8 = 18;
   /** RegularExpression Id. */
-  int F32 = 15;
+  int I16 = 19;
   /** RegularExpression Id. */
-  int F64 = 16;
+  int I32 = 20;
   /** RegularExpression Id. */
-  int BOOL = 17;
+  int I64 = 21;
   /** RegularExpression Id. */
-  int CHAR = 18;
+  int F32 = 22;
   /** RegularExpression Id. */
-  int USIZE = 19;
+  int F64 = 23;
   /** RegularExpression Id. */
-  int ISIZE = 20;
+  int BOOL = 24;
   /** RegularExpression Id. */
-  int AUTO = 21;
+  int CHAR = 25;
   /** RegularExpression Id. */
-  int ARRAY = 22;
+  int STRING = 26;
   /** RegularExpression Id. */
-  int LITERAL_SUFFIX = 23;
+  int USIZE = 27;
   /** RegularExpression Id. */
-  int LITERAL_INT_BIN = 24;
+  int ISIZE = 28;
   /** RegularExpression Id. */
-  int LITERAL_INT_OCT = 25;
+  int AUTO = 29;
   /** RegularExpression Id. */
-  int LITERAL_INT_DEC = 26;
+  int ARRAY = 30;
   /** RegularExpression Id. */
-  int LITERAL_INT_HEX = 27;
+  int TYPE = 31;
   /** RegularExpression Id. */
-  int LITERAL_FLOAT32 = 28;
+  int LITERAL_SUFFIX = 32;
   /** RegularExpression Id. */
-  int LITERAL_FLOAT64 = 29;
+  int LITERAL_INT_BIN = 33;
   /** RegularExpression Id. */
-  int LITERAL_BOOL = 30;
+  int LITERAL_INT_OCT = 34;
   /** RegularExpression Id. */
-  int FN = 31;
+  int LITERAL_INT_DEC = 35;
   /** RegularExpression Id. */
-  int CLASS = 32;
+  int LITERAL_INT_HEX = 36;
   /** RegularExpression Id. */
-  int STRUCT = 33;
+  int LITERAL_FLOAT32 = 37;
   /** RegularExpression Id. */
-  int ENUM = 34;
+  int LITERAL_FLOAT64 = 38;
   /** RegularExpression Id. */
-  int PUB = 35;
+  int LITERAL_BOOL = 39;
   /** RegularExpression Id. */
-  int PRIV = 36;
+  int FN = 40;
   /** RegularExpression Id. */
-  int IF = 37;
+  int CLASS = 41;
   /** RegularExpression Id. */
-  int ELSE = 38;
+  int STRUCT = 42;
   /** RegularExpression Id. */
-  int SWITCH = 39;
+  int ENUM = 43;
   /** RegularExpression Id. */
-  int FOR = 40;
+  int PUB = 44;
   /** RegularExpression Id. */
-  int WHILE = 41;
+  int PRIV = 45;
   /** RegularExpression Id. */
-  int BREAK = 42;
+  int IF = 46;
   /** RegularExpression Id. */
-  int CONTINUE = 43;
+  int ELSE = 47;
   /** RegularExpression Id. */
-  int RETURN = 44;
+  int SWITCH = 48;
   /** RegularExpression Id. */
-  int BIND = 45;
+  int FOR = 49;
   /** RegularExpression Id. */
-  int IDENTIFIER = 46;
+  int WHILE = 50;
   /** RegularExpression Id. */
-  int LETTER = 47;
+  int BREAK = 51;
   /** RegularExpression Id. */
-  int DIGIT_BIN = 48;
+  int CONTINUE = 52;
   /** RegularExpression Id. */
-  int DIGIT_OCT = 49;
+  int RETURN = 53;
   /** RegularExpression Id. */
-  int DIGIT_DEC = 50;
+  int BIND = 54;
   /** RegularExpression Id. */
-  int DIGIT_HEX = 51;
+  int IDENTIFIER = 55;
+  /** RegularExpression Id. */
+  int CHARACTER_LITERAL = 56;
+  /** RegularExpression Id. */
+  int STRING_LITERAL = 57;
+  /** RegularExpression Id. */
+  int LETTER = 58;
+  /** RegularExpression Id. */
+  int DIGIT_BIN = 59;
+  /** RegularExpression Id. */
+  int DIGIT_OCT = 60;
+  /** RegularExpression Id. */
+  int DIGIT_DEC = 61;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 62;
 
   /** Lexical state. */
   int DEFAULT = 0;
+  /** Lexical state. */
+  int IN_SINGLE_LINE_COMMENT = 1;
+  /** Lexical state. */
+  int IN_FORMAL_COMMENT = 2;
+  /** Lexical state. */
+  int IN_MULTI_LINE_COMMENT = 3;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -116,6 +136,13 @@ public interface ScriptlangParserConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"\\r\"",
+    "\"//\"",
+    "<token of kind 6>",
+    "\"/*\"",
+    "<SINGLE_LINE_COMMENT>",
+    "\"*/\"",
+    "\"*/\"",
+    "<token of kind 11>",
     "\"{\"",
     "\"}\"",
     "\"u8\"",
@@ -130,10 +157,12 @@ public interface ScriptlangParserConstants {
     "\"f64\"",
     "\"bool\"",
     "\"char\"",
+    "\"string\"",
     "\"usize\"",
     "\"isize\"",
     "\"auto\"",
     "\"array\"",
+    "\"type\"",
     "<LITERAL_SUFFIX>",
     "<LITERAL_INT_BIN>",
     "<LITERAL_INT_OCT>",
@@ -158,18 +187,20 @@ public interface ScriptlangParserConstants {
     "\"return\"",
     "\"@\"",
     "<IDENTIFIER>",
+    "<CHARACTER_LITERAL>",
+    "<STRING_LITERAL>",
     "<LETTER>",
     "<DIGIT_BIN>",
     "<DIGIT_OCT>",
     "<DIGIT_DEC>",
     "<DIGIT_HEX>",
     "\":\"",
+    "\",\"",
+    "\";\"",
     "\"(\"",
     "\")\"",
     "\"[\"",
     "\"]\"",
-    "\";\"",
-    "\",\"",
     "\"=\"",
     "\"*=\"",
     "\"/=\"",

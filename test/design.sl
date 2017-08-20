@@ -329,7 +329,7 @@ for(auto file : ls) {
 /* 1- Review datatypes (generics, ranges, etc.)                               */
 /* 2- Add memory specifications (stack, heap, safety, variable binding, etc)  */
 /* 3- Pointers (smart pointers only) (DESIGN)                                 */
-/* 4- Add scope                                                               */
+/* 4- Add scope specifications                                                */
 /* 5- Add function overloading                                                */
 /* 6- Add operator overloading                                                */
 /* 7- Add imports                                                             */
