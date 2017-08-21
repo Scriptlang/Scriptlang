@@ -5,37 +5,37 @@ public interface ScriptlangParserTreeConstants
 {
   public int JJT_ROOT = 0;
   public int JJTVOID = 1;
-  public int JJT_DECLARATION_VARIABLE = 2;
+  public int JJT_DECLARATION_OBJECT = 2;
   public int JJT_DECLARATION_FUNCTION = 3;
-  public int JJT_DECLARATION_OBJECT = 4;
-  public int JJT_BLOCKUNIT = 5;
-  public int JJT_STATEMENT_EMPTY = 6;
-  public int JJT_TYPE_PRIMITIVE = 7;
-  public int JJT_DECLARATION_VAROBJ_LIST = 8;
-  public int JJT_EXPRESSION = 9;
-  public int JJT_ASSIGNMENT = 10;
-  public int JJT_DECLARATION_VAROBJ_SINGLE = 11;
-  public int JJT_DECLARATION_FUNCTION_LAMBDA = 12;
-  public int JJT_DECLARATION_STRUCT = 13;
-  public int JJT_DECLARATION_CLASS = 14;
-  public int JJT_DECLARATION_CLASS_INHERITANCE = 15;
-  public int JJT_DECLARATION_ENUM = 16;
-  public int JJT_DECLARATION_ENUMBODY_CONST = 17;
-  public int JJT_DECLARATION_ENUMBODY_STRUCT = 18;
-  public int JJT_DECLARATION_ENUMBODY_STRUCT_BODYLESS = 19;
-  public int JJT_DECLARATION_TUPLE_NAMED = 20;
-  public int JJT_DECLARATION_TUPLE_NAMED_ARG = 21;
-  public int JJT_DECLARATION_BIND = 22;
-  public int JJT_DECLARATION_TYPELIST = 23;
-  public int JJT_DECLARATION_PARAMETER_LIST = 24;
-  public int JJT_DECLARATION_PARAMETER_SINGLE = 25;
-  public int JJT_DECLARATION_PARAMETER_CALLER_LIST = 26;
-  public int JJT_DECLARATION_PARAMETER_CALLER_SINGLE = 27;
-  public int JJT_DECLARATION_ARRAY = 28;
-  public int JJT_DECLARATION_ARRAY_ARG = 29;
-  public int JJT_ASSIGNMENT_OPERATION = 30;
-  public int JJT_IDENTIFIER = 31;
-  public int JJT_LITERAL = 32;
+  public int JJT_DECLARATION_VAROBJ_SINGLE = 4;
+  public int JJT_DECLARATION_FUNCTION_LAMBDA = 5;
+  public int JJT_BLOCKUNIT_THREAD = 6;
+  public int JJT_BLOCKUNIT = 7;
+  public int JJT_STATEMENT_EMPTY = 8;
+  public int JJT_TYPE_CLASS = 9;
+  public int JJT_DECLARATION_VAROBJ_LIST = 10;
+  public int JJT_DECLARATION_STRUCT = 11;
+  public int JJT_DECLARATION_CLASS = 12;
+  public int JJT_DECLARATION_CLASS_INHERITANCE = 13;
+  public int JJT_DECLARATION_ENUM = 14;
+  public int JJT_DECLARATION_ENUMBODY_CONST = 15;
+  public int JJT_DECLARATION_ENUMBODY_STRUCT = 16;
+  public int JJT_DECLARATION_ENUMBODY_STRUCT_BODYLESS = 17;
+  public int JJT_DECLARATION_TUPLE_NAMED = 18;
+  public int JJT_DECLARATION_TUPLE_NAMED_ARG = 19;
+  public int JJT_DECLARATION_BIND = 20;
+  public int JJT_DECLARATION_PARAMETER_LIST = 21;
+  public int JJT_DECLARATION_PARAMETER_SINGLE = 22;
+  public int JJT_DECLARATION_PARAMETER_CALLER_LIST = 23;
+  public int JJT_DECLARATION_PARAMETER_CALLER_SINGLE = 24;
+  public int JJT_DECLARATION_ARRAY = 25;
+  public int JJT_EXPRESSION = 26;
+  public int JJT_DECLARATION_ARRAY_ARG = 27;
+  public int JJT_ASSIGNMENT = 28;
+  public int JJT_ASSIGNMENT_OPERATION = 29;
+  public int JJT_IDENTIFIER = 30;
+  public int JJT_LITERAL = 31;
+  public int JJT_TYPE_SUFFIX = 32;
   public int JJT_DECLARATION_ARRAY_SLICE_START = 33;
   public int JJT_DECLARATION_ARRAY_SLICE_END = 34;
   public int JJT_DECLARATION_ARRAY_SLICE_SKIP = 35;
@@ -59,25 +59,24 @@ public interface ScriptlangParserTreeConstants
   public int JJT_STATEMENT_WHILE = 53;
   public int JJT_STATEMENT_WHILE_BODYBRANCH = 54;
   public int JJT_STATEMENT_FLOW = 55;
-  public int JJT_TYPE_PRIMITIVE_TUPLE = 56;
-  public int JJT_TYPE_PRIMITIVE_TUPLE_TYPESONLY = 57;
-  public int JJT_TYPE_MODIFIER = 58;
+  public int JJT_TYPE_PRIMITIVE = 56;
+  public int JJT_TYPE_PRIMITIVE_TUPLE = 57;
+  public int JJT_TYPE_PRIMITIVE_TUPLE_TYPESONLY = 58;
+  public int JJT_TYPE_MODIFIER = 59;
 
 
   public String[] jjtNodeName = {
     "_Root",
     "void",
-    "_Declaration_Variable",
-    "_Declaration_Function",
     "_Declaration_Object",
-    "_BlockUnit",
-    "_Statement_Empty",
-    "_Type_Primitive",
-    "_Declaration_VarObj_List",
-    "_Expression",
-    "_Assignment",
+    "_Declaration_Function",
     "_Declaration_VarObj_Single",
     "_Declaration_Function_Lambda",
+    "_BlockUnit_Thread",
+    "_BlockUnit",
+    "_Statement_Empty",
+    "_Type_Class",
+    "_Declaration_VarObj_List",
     "_Declaration_Struct",
     "_Declaration_Class",
     "_Declaration_Class_Inheritance",
@@ -88,16 +87,18 @@ public interface ScriptlangParserTreeConstants
     "_Declaration_Tuple_Named",
     "_Declaration_Tuple_Named_Arg",
     "_Declaration_Bind",
-    "_Declaration_TypeList",
     "_Declaration_Parameter_List",
     "_Declaration_Parameter_Single",
     "_Declaration_Parameter_Caller_List",
     "_Declaration_Parameter_Caller_Single",
     "_Declaration_Array",
+    "_Expression",
     "_Declaration_Array_Arg",
+    "_Assignment",
     "_Assignment_Operation",
     "_Identifier",
     "_Literal",
+    "_Type_Suffix",
     "_Declaration_Array_Slice_Start",
     "_Declaration_Array_Slice_End",
     "_Declaration_Array_Slice_Skip",
@@ -121,9 +122,10 @@ public interface ScriptlangParserTreeConstants
     "_Statement_While",
     "_Statement_While_BodyBranch",
     "_Statement_Flow",
+    "_Type_Primitive",
     "_Type_Primitive_Tuple",
     "_Type_Primitive_Tuple_TypesOnly",
     "_Type_Modifier",
   };
 }
-/* JavaCC - OriginalChecksum=ff61ff11a3d01170c1b1824f40d09705 (do not edit this line) */
+/* JavaCC - OriginalChecksum=54c135d92801583e9533035f8b23fae1 (do not edit this line) */

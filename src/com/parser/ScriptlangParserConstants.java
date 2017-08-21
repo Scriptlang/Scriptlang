@@ -104,21 +104,23 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int BIND = 54;
   /** RegularExpression Id. */
-  int IDENTIFIER = 55;
+  int NEW = 55;
   /** RegularExpression Id. */
-  int CHARACTER_LITERAL = 56;
+  int IDENTIFIER = 56;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 57;
+  int CHARACTER_LITERAL = 57;
   /** RegularExpression Id. */
-  int LETTER = 58;
+  int STRING_LITERAL = 58;
   /** RegularExpression Id. */
-  int DIGIT_BIN = 59;
+  int LETTER = 59;
   /** RegularExpression Id. */
-  int DIGIT_OCT = 60;
+  int DIGIT_BIN = 60;
   /** RegularExpression Id. */
-  int DIGIT_DEC = 61;
+  int DIGIT_OCT = 61;
   /** RegularExpression Id. */
-  int DIGIT_HEX = 62;
+  int DIGIT_DEC = 62;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 63;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -186,6 +188,7 @@ public interface ScriptlangParserConstants {
     "\"continue\"",
     "\"return\"",
     "\"@\"",
+    "\"new\"",
     "<IDENTIFIER>",
     "<CHARACTER_LITERAL>",
     "<STRING_LITERAL>",

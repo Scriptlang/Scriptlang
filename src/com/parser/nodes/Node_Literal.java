@@ -10,8 +10,8 @@ public class Node_Literal extends GenericNode {
 		INT_BIN, INT_OCT, INT_DEC, INT_HEX, /* Integers   */
 		FLOAT32, FLOAT64,                   /* Floats     */
 		BOOL,                               /* Booleans   */
-		STRING,                             /* Strings    */
-		CHAR                                /* Characters */
+		CHAR,                               /* Characters */
+		STRING                              /* Strings    */
 	}
 	
 	LiteralType type = LiteralType.NULL;

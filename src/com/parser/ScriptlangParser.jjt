@@ -2,26 +2,26 @@
 /** Parser options **/
 /**----------------**/
 options {
-    LOOKAHEAD              = 1;
-    CHOICE_AMBIGUITY_CHECK = 2;
-    OTHER_AMBIGUITY_CHECK  = 1;
-    STATIC                 = false;
-    DEBUG_PARSER           = false;
-    DEBUG_LOOKAHEAD        = false;
-    DEBUG_TOKEN_MANAGER    = false;
-    ERROR_REPORTING        = true;
-    JAVA_UNICODE_ESCAPE    = false;
-    UNICODE_INPUT          = false;
-    IGNORE_CASE            = false;
-    USER_TOKEN_MANAGER     = false;
-    USER_CHAR_STREAM       = false;
-    BUILD_PARSER           = true;
-    BUILD_TOKEN_MANAGER    = true;
-    SANITY_CHECK           = true;
-    FORCE_LA_CHECK         = false;
-    MULTI                  = true;
-    NODE_EXTENDS           = "NodeSetter";
-    TRACK_TOKENS           = true;
+	LOOKAHEAD              = 1;
+	CHOICE_AMBIGUITY_CHECK = 2;
+	OTHER_AMBIGUITY_CHECK  = 1;
+	STATIC                 = false;
+	DEBUG_PARSER           = false;
+	DEBUG_LOOKAHEAD        = false;
+	DEBUG_TOKEN_MANAGER    = false;
+	ERROR_REPORTING        = true;
+	JAVA_UNICODE_ESCAPE    = false;
+	UNICODE_INPUT          = false;
+	IGNORE_CASE            = false;
+	USER_TOKEN_MANAGER     = false;
+	USER_CHAR_STREAM       = false;
+	BUILD_PARSER           = true;
+	BUILD_TOKEN_MANAGER    = true;
+	SANITY_CHECK           = true;
+	FORCE_LA_CHECK         = false;
+	MULTI                  = true;
+	NODE_EXTENDS           = "NodeSetter";
+	TRACK_TOKENS           = true;
 }
 
 PARSER_BEGIN(ScriptlangParser) /** ScriptLangParser Class - BEGIN **/
@@ -30,6 +30,9 @@ package com.parser;
 import com.parser.nodes.Node_TypePrimitive.TypePrimitive;
 import com.parser.nodes.Node_TypeModifier.TypeModifier;
 import com.parser.nodes.Node_Literal.LiteralType;
+
+import org.javacc.jjtree.SimpleNode;
+
 import com.parser.nodes.Node_Expression.ExpressionType;
 
 public class ScriptlangParser {
@@ -46,10 +49,7 @@ PARSER_END(ScriptlangParser) /** ScriptLangParser Class - END **/
 /**--------------------**/
 SKIP :
 {
-	" "  |
-	"\t" |
-	"\n" |
-	"\r"
+	" " | "\t" | "\n" | "\r"
 }
 
 /**----------**/
@@ -57,9 +57,9 @@ SKIP :
 /**----------**/
 MORE :
 {
-	"//" : IN_SINGLE_LINE_COMMENT                                      |
-	< "/**" ~[ "/" ] > { input_stream.backup(1); } : IN_FORMAL_COMMENT |
-	"/*" : IN_MULTI_LINE_COMMENT
+	"//" : IN_SINGLE_LINE_COMMENT
+|	< "/**" ~[ "/" ] > { input_stream.backup(1); } : IN_FORMAL_COMMENT
+|	"/*" : IN_MULTI_LINE_COMMENT
 }
 
 <IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN :
@@ -110,12 +110,12 @@ TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 |   <LITERAL_SUFFIX: ("i" | "u" | "f" | "uz" | "iz") (<DIGIT_DEC>)+>
 
 	/* Literals */
-|	<LITERAL_INT_BIN: "0b" (<DIGIT_BIN>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_INT_OCT: "0" (<DIGIT_OCT>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_INT_DEC: (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_INT_HEX: "0x" (<DIGIT_HEX>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_FLOAT32: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
-|	<LITERAL_FLOAT64: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+ (<LITERAL_SUFFIX>)?>
+|	<LITERAL_INT_BIN: "0b" (<DIGIT_BIN>)+>
+|	<LITERAL_INT_OCT: "0" (<DIGIT_OCT>)+>
+|	<LITERAL_INT_DEC: (<DIGIT_DEC>)+>
+|	<LITERAL_INT_HEX: "0x" (<DIGIT_HEX>)+>
+|	<LITERAL_FLOAT32: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+>
+|	<LITERAL_FLOAT64: (<DIGIT_DEC>)+ "." (<DIGIT_DEC>)+>
 |	<LITERAL_BOOL:    ("true" | "false")>
 
 	/* Keywords */
@@ -134,6 +134,7 @@ TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 |   <CONTINUE: "continue"> /* Jump to the next loop cycle                                   */
 |   <RETURN:   "return"  > /* Return from a block unit                                      */
 |	<BIND:     "@"       > /* Binds an identifier to a pattern (could be an anonymous bind) */
+|	<NEW:      "new"     > /* Instantiate an object on the heap / fork a new thread         */
 
 	/* Identifiers */
 |	<IDENTIFIER: <LETTER> (<LETTER> | <DIGIT_BIN> | <DIGIT_OCT> | <DIGIT_DEC> | <DIGIT_HEX>)*>
@@ -147,8 +148,7 @@ TOKEN : /**** IMPORTANT: !! DO NOT CHANGE THE TOKEN DECLARATION ORDER !! ****/
 				)
 			)
 		)
-		"'"
->
+		"'">
 |	<STRING_LITERAL:
 		"\""
 		( (~["\"","\\","\n","\r"]) |
@@ -179,79 +179,102 @@ void _All() #void : /* Matches any kind of top level construct */
 { Token t = null; }
 {
 	/* A label */
-	LOOKAHEAD(2) _Identifier() ":" | 
-
+	LOOKAHEAD(2) _Identifier() ":" 
+	
 	/* Early declare primitive variables
 	 * (REASON: when declaring duples the parser thinks the tuple type is an expression,
-	 *  thus, we'll declare variables with tuple types before statements) */
-	LOOKAHEAD(3) ( ( _Type_Modifier() )? _Type_Primitive_Tuple_TypesOnly() _Identifier() ( LOOKAHEAD(2) "," _Identifier() )* ( LOOKAHEAD(2) _Assignment() )? ) #_Declaration_Variable() ";" |
-	
-	/* Early declare function to resolve conflict with blockUnit (due to access modifiers) */
-	LOOKAHEAD(3) ( _Type_Modifier() ( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? _Identifier() 
-		"(" ( _Declaration_Parameter_List() )? ")" _BlockUnit() ) #_Declaration_Function() |
-	
-	/* A block unit -> {...} */
-	LOOKAHEAD(4) _BlockUnit() |
+	 *  thus, we'll declare variables with tuple types before statements
+	 *  (maybe there's a right way of doing this)) */
+|	LOOKAHEAD(3) ( ( _Type_Modifier() )? _Type_Primitive_Tuple_TypesOnly() _Identifier() ( LOOKAHEAD(2) "," _Identifier() )* ( LOOKAHEAD(2) _Assignment() )? ) #_Declaration_Object() ";"
 
-	/* An object (of a class) */
-	LOOKAHEAD(3) ( _Declaration_Object() _Declaration_VarObj_List() ) #_Declaration_Object() |
-	//LOOKAHEAD(3) ( LOOKAHEAD(2) ( LOOKAHEAD(7) ( ( _Identifier() #_Expression() ) #_Statement_Expression() ) | _Declaration_Object() ";" ) )+  |
-	
+	/* Early declare functions to resolve conflict with BlockUnit (due to access modifiers) */
+|	LOOKAHEAD(4) ( LOOKAHEAD(5000) /** XXX: Yikes... This could cause an obscure bug in the future. Better keep an eye on it. **/
+		/* Normal function */
+		( ( _Type_Modifier() )? ( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? _Identifier() 
+		"(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
+		) #_Declaration_Function()
+	|
+		/* Lambda functions (aka function pointers) */
+		( ( _Type_Modifier() )? ( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? ( ( _Identifier() )?
+		"(" ( _Declaration_Parameter_List() )? ")" _Assignment_Noprimexpr() ) #_Declaration_VarObj_Single() _Declaration_VarObj_List()
+		) #_Declaration_Function_Lambda()
+	)
+
+	/* A block unit -> {...} */
+|	LOOKAHEAD(5) _BlockUnit()
+
+	/* Early declare an object (of a class)
+	 * (REASON: it's being declared early because a class type is interpreted as an expression,
+	 * which is something we do not want) */
+|	LOOKAHEAD(3) ( _Declaration_Object() _Declaration_VarObj_List() ) #_Declaration_Object()
+
 	/* Statements -> if, switch, for, while */
-	LOOKAHEAD(2) _Statement() |
+|	LOOKAHEAD(2) _Statement()
 	
 	/* Declarations -> variables, functions, classes, structs, enums */
-	LOOKAHEAD(2) _Declaration() |
+|	LOOKAHEAD(2) _Declaration()
 
 	/* An access modifier for the actual top level module */
-	_Type_Modifier() ":"                               
+|	_Type_Modifier() ":"                               
 }
 
 /**-------------------------**/
 /** Higher level constructs **/
 /**-------------------------**/
-void _BlockUnit() : {} /* Also known as an independent Compilation Unit / Module */
+void _BlockUnit() #void : {} /* Also known as an independent Compilation Unit / Module */
 {
-	( ( _Type_Modifier() )? _Identifier() )? ( "[" "]" )? <LBRACE> ( _All() )* <RBRACE>
+	/* A threaded block unit */
+	LOOKAHEAD(3) ( ( _Type_Modifier() )? <NEW> ( _Identifier() )? ( "[" ( _Declaration_Array() )* "]" )? <LBRACE> ( _All() )* <RBRACE> ) #_BlockUnit_Thread()
+	
+	/* A normal block unit */
+|	( ( ( _Type_Modifier() )? _Identifier() )? ( "[" ( _Declaration_Array() )* "]" )? <LBRACE> ( _All() )* <RBRACE> ) #_BlockUnit()				
 }
 
 void _Statement() #void : {} /* Any kind of statement goes here */
 {
-	";" #_Statement_Empty()              | /* Just a semicolon                         */
-	LOOKAHEAD(3) _Statement_Switch()     | /* Switch statement                         */
-	LOOKAHEAD(3) _Statement_If()         | /* If statement                             */
-	LOOKAHEAD(3) _Statement_For()        | /* For statement                            */
-	LOOKAHEAD(3) _Statement_While()      | /* While statement                          */
-	LOOKAHEAD(2) _Statement_Expression() | /* Assignment statement                     */		
-	_Statement_Flow()                      /* Statement that disturbs the program flow */
+	";" #_Statement_Empty()              /* Just a semicolon                           */
+|	LOOKAHEAD(3) _Statement_Switch()     /* Switch statement                           */
+|	LOOKAHEAD(3) _Statement_If()         /* If statement                               */
+|	LOOKAHEAD(3) _Statement_For()        /* For statement                              */
+|	LOOKAHEAD(3) _Statement_While()      /* While statement                            */
+|	LOOKAHEAD(3) _Statement_Flow() ";"   /* A statement that disturbs the program flow */
+|	LOOKAHEAD(2) _Statement_Expression() /* Assignment statement                       */		
 }
 
 void _Declaration() #void : {} /* Any kind of declaration goes here */
 {
-	LOOKAHEAD(2) _Declaration_Variable() _Declaration_VarObj_List() ";" | /* Variables   */
-	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Function()          | /* Functions   */
-	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Class() ";"         | /* Classes     */
-	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Struct() ";"        | /* Structures  */
-	( _Type_Modifier() )? _Declaration_Enum() ";"                         /* Enumerators */
+	LOOKAHEAD(2) _Declaration_Variable() _Declaration_VarObj_List() /* Variables   */
+|	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Class() ";"     /* Classes     */
+|	LOOKAHEAD(2) ( _Type_Modifier() )? _Declaration_Struct() ";"    /* Structures  */
+|	( _Type_Modifier() )? _Declaration_Enum() ";"                   /* Enumerators */
 }
 
 /**----------------------------------**/
 /** Lower level *generic* constructs **/
 /**----------------------------------**/
-void _Declaration_Variable() : {} /* Variable declaration: <type> <var_name> <assignment>? ; */
+void _Declaration_Variable() #_Declaration_Object() : {} /* Variable declaration: <modif>? <type> <var_name> <assignment>? */
 {
-	( _Type_Modifier() )? _Type_Primitive() _Identifier()
+	/** NOTE: It's easier if we treat variables as objects
+	 * (during parsing only, this won't impact the compiler's performance later on) **/
+	( _Type_Modifier() )? _Type_Primitive()
+	( _Identifier() ( LOOKAHEAD(2) _Assignment_Noprimexpr() )? ) #_Declaration_VarObj_Single()
 }
 
-void _Declaration_Object() #void : {} /* Variable object declaration: <class> <obj_name> <assignment>? ; */
+void _Declaration_Object() #void : {} /* Variable object declaration: <modif>? <classname>|<type> <obj_name> <assignment>? */
 {
-	( _Type_Modifier() )? _Identifier() #_Type_Primitive() _Identifier()
+	/** NOTE: It too becomes easy if we also match normal primitive types
+	 *  here as a redundant way of checking for the type in case the type
+	 *  happens to be a primitive instead of a classname.
+	 *  This is why transforming 'class objects' and 'variables' into objects
+	 *  only is easier on the parser (since the parser thinks classnames are expressions).**/
+	( _Type_Modifier() )? ( _Identifier() #_Type_Class() | _Type_Primitive() )
+	( _Identifier() ( LOOKAHEAD(2) _Assignment_Noprimexpr() )? ) #_Declaration_VarObj_Single()
 }
 
-void _Declaration_VarObj_List() : {}
+void _Declaration_VarObj_List() #void : {} /* Variable / Object declaration list: ( ( , <assignment>)+ )? (;|<assignment>) */
 {
-	( LOOKAHEAD(2) "," ( _Identifier() ( LOOKAHEAD(2) ( _Assignment_Operation() _Expression() #_Expression() ) #_Assignment() )? ) #_Declaration_VarObj_Single() )*
-	( ";" | ( _Assignment_Operation() _Expression() #_Expression() ) #_Declaration_VarObj_Single() )
+	( ( LOOKAHEAD(2) "," ( _Identifier() ( LOOKAHEAD(2) _Assignment_Noprimexpr() )? ) #_Declaration_VarObj_Single() )+ #_Declaration_VarObj_List() )?
+	( ";" | ( _Assignment_Noprimexpr() #_Declaration_VarObj_Single() ) #_Declaration_VarObj_List() )
 }
 
 void _Declaration_Function() : {} /* Function declaration: (<type>|fn)? <IDENTIFIER> (<params>?) <blockunit> */
@@ -259,9 +282,10 @@ void _Declaration_Function() : {} /* Function declaration: (<type>|fn)? <IDENTIF
 	( LOOKAHEAD(2) ( _Type_Primitive() | <FN> ) )? _Identifier() "(" ( _Declaration_Parameter_List() )? ")" _BlockUnit()
 }
 
-void _Declaration_Function_Lambda() : {} /* Function declaration: <type> <IDENTIFIER>? (<params>?) <blockunit>? */
+void _Declaration_Function_Lambda() #void : {} /* Function declaration: <type> <IDENTIFIER>? (<params>)? (<blockunit>|<assignment>)? */
 {
-	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")" ( LOOKAHEAD(2) _BlockUnit() )?
+	_Type_Primitive() ( _Identifier() )? "(" ( _Declaration_Parameter_List() )? ")"
+	( LOOKAHEAD(2) ( LOOKAHEAD(2) _BlockUnit() | ( _Identifier() ( LOOKAHEAD(2) _Assignment_Noprimexpr() )? ) #_Declaration_VarObj_Single() ) )?
 }
 
 void _Declaration_Struct() : {} /* Struct declaration: struct <IDENTIFIER> { <declaration>* } ; */
@@ -274,7 +298,7 @@ void _Declaration_Class() : {} /* Class declaration: class <IDENTIFIER> ( : (<mo
 	<CLASS> _Identifier() ( ":" ( LOOKAHEAD(2) ( _Type_Modifier() )? _Identifier() ( "," )? )+ #_Declaration_Class_Inheritance() )? _BlockUnit()
 }
 
-void _Declaration_Enum() : {} /* Enum declaration: enum <IDENTIFIER>? { <enumbodylist>  } */
+void _Declaration_Enum() : {} /* Enum declaration: enum <IDENTIFIER>? { <enumbodylist>? } */
 {
 	<ENUM> ( _Identifier() )? "{" ( _Declaration_EnumBody_List() )? "}"
 }
@@ -284,14 +308,15 @@ void _Declaration_EnumBody_List() #void : {} /* Enum body list declaration */
 	( _Declaration_EnumBody() ( "," )? )+
 }
 
-void _Declaration_EnumBody() #void : {} /* Enum body declaration: <enumconstlist> | <struct> | <tuple> | <function> |  */
+void _Declaration_EnumBody() #void : {} /* Enum body declaration: <tuple> | <struct> | <enumconstlist> | <function> */
 {	
 	/* An enum can have ... */
-	LOOKAHEAD(3) _Declaration_Tuple_Named()     | /* A named tuple (or anonymous) with types and expression */
-	LOOKAHEAD(3) _Declaration_EnumBody_Struct() | /* A struct declaration                                   */
-	_Declaration_EnumBody_Struct_Bodyless()     | /* A struct without a body                                */
-	LOOKAHEAD(3) _Declaration_EnumBody_Const()  | /* A constant identifier                                  */
-	_Declaration_Function_Lambda()                /* A function, which acts as a lambda                     */
+	LOOKAHEAD(3) _Declaration_Tuple_Named()     /* A named tuple (or anonymous) with types and expression */
+|	LOOKAHEAD(3) _Declaration_EnumBody_Struct() /* A struct declaration                                   */
+|	_Declaration_EnumBody_Struct_Bodyless()     /* A struct without a body                                */
+|	LOOKAHEAD(3) _Declaration_EnumBody_Const()  /* A constant identifier                                  */
+|	_Declaration_Function_Lambda()              /* A function, which acts as a lambda                     */
+		#_Declaration_Function_Lambda()
 }
 
 void _Declaration_EnumBody_Const() : {} /* Enum body const declaration: <IDENTIFIER> <assignment>? */
@@ -309,20 +334,15 @@ void _Declaration_EnumBody_Struct_Bodyless() : {} /* Enum body struct declaratio
 	<STRUCT> _Identifier()
 }
 
-void _Declaration_Tuple_Named() : {} /* Enum body tuple declaration: <IDENTIFIER>? (<type>, <expression>, <type>, ...) */
+void _Declaration_Tuple_Named() : {} /* Enum body tuple declaration: <IDENTIFIER>? ( ((<expression>|<type>),?)+ ) */
 {
-	( _Identifier() )? "(" ( ( LOOKAHEAD(3)  _Expression() | _Type_Primitive() ) #_Declaration_Tuple_Named_Arg() ( "," )? )+ ")"
+	( _Identifier() )? "(" ( ( LOOKAHEAD(3) _Expression() | _Type_Primitive() ) #_Declaration_Tuple_Named_Arg() ( "," )? )+ ")"
 }
 
-void _Declaration_Bind() : {} /* Bind declaration: <IDENTIFIER>? | [<IDENTIFIER>,? <IDENTIFIER>,? ...] @ */
+void _Declaration_Bind() : {} /* Bind declaration: <IDENTIFIER>? @ | [<IDENTIFIER>,? <IDENTIFIER>,? ...] @ */
 {
-	( _Identifier() )? <BIND> |
-	"[" ( ( LOOKAHEAD(2) _Identifier() | _Declaration_Bind() ) ( "," )? )+ "]" <BIND>
-}
-
-void _Declaration_TypeList() : {} /* Type list declaration: <type>, <type>, <type>, ... */
-{
-	(LOOKAHEAD(2) _Type_Primitive() ( "," )? )+
+	( _Identifier() )? <BIND>
+|	"[" ( ( LOOKAHEAD(2) _Identifier() | _Declaration_Bind() ) ( "," )? )+ "]" <BIND>
 }
 
 void _Declaration_Parameter_List() : {} /* Parameter list declaration: <type> <IDENTIFIER>, <type> <IDENTIFIER>, <type>, <type>, ... */
@@ -335,20 +355,21 @@ void _Declaration_Parameter_Single() : {} /* Declaration of a single function ar
 	_Type_Primitive() ( LOOKAHEAD(2) _Identifier() )?
 }
 
-void _Declaration_Parameter_Caller_List() : {} /* Parameter list declaration: <IDENTIFIER>, <expression>, <IDENTIFIER>, ... */
+void _Declaration_Parameter_Caller_List() : {} /* Parameter list declaration: ( <expression>,? )* */
 {
 	( _Expression() #_Declaration_Parameter_Caller_Single() ( "," )? )*
 }
 
-void _Declaration_Array() : {}
+void _Declaration_Array() : {} /* Declaration array: ( <expression> ( "," <expression>? )* )+ */
 {
 	( LOOKAHEAD(2) ( _Expression() #_Expression() ) #_Declaration_Array_Arg() ( "," ( LOOKAHEAD(2) _Expression() #_Expression() )? #_Declaration_Array_Arg() )* )+	
 }
 
-void _Expression() #void : {}
+void _Expression() #void : {} /* Expression: <blockunit> | <cascaded_expression> | <prim_expr> <assignment> */
 {
-	LOOKAHEAD(3) _Expression_CondOr() |
-	_Expression_Primary() _Assignment()
+	LOOKAHEAD(5000) _BlockUnit() /** XXX: Keep an eye on this. Could cause a bug in the future. **/
+|	LOOKAHEAD(3) _Expression_CondOr()
+|	_Expression_Primary() _Assignment()
 }
 
 void _Assignment() : {} /* Assignment: <prim_expr>? <assign_operation> <expr> */
@@ -356,7 +377,12 @@ void _Assignment() : {} /* Assignment: <prim_expr>? <assign_operation> <expr> */
 	( LOOKAHEAD(2) _Expression_Primary() )? _Assignment_Operation() _Expression() #_Expression()
 }
 
-void _Assignment_Operation() :
+void _Assignment_Noprimexpr() #_Assignment() : {} /* Assignment: <assign_operation> <expr> */
+{
+	_Assignment_Operation() _Expression() #_Expression()
+}
+
+void _Assignment_Operation() : /* Assignment operation. It's self explanatory. */
 { Token t; }
 {
 	( t="=" | t="*=" | t="/=" | t="+=" | t="-=" | t=">>=" | t="<<=" | t="&=" | t="|=" | t="^=" | t="%=" )
@@ -399,6 +425,11 @@ void _Literal() : /* Literal constants (signed/unsigned integer, float, boolean,
 /**-------------**/
 /** Expressions **/
 /**-------------**/
+
+/** (The following
+ *   productions cascade until the 
+ *   '_Expression_Primary' production). **/
+
 void _Expression_CondOr() #void : {}
 {
 	_Expression_CondAnd() ( LOOKAHEAD(2) "||" _Expression_CondAnd() #_Expression() { jjtn001.setExpr("||", ExpressionType.CONDOR); } )*
@@ -473,70 +504,81 @@ void _Expression_Cast() #void :
 	LOOKAHEAD(3) "(" t = _Type_Suffix() ")" ( LOOKAHEAD(2) _Expression_Unary() )? #_Expression()
 	{
 		jjtn001.setExpr("(" + t.image + ")", ExpressionType.CAST);
-	} |
-	_Expression_Unary()
+	} 
+|	_Expression_Unary()
 }
 
 void _Expression_Unary() #void : {}
 {
-	"++" _Expression_Unary() #_Expression() { jjtn001.setExpr("++", ExpressionType.UNARY); } |
-	"--" _Expression_Unary() #_Expression() { jjtn002.setExpr("--", ExpressionType.UNARY); } |
-	"~"  _Expression_Unary() #_Expression() { jjtn003.setExpr("~",  ExpressionType.UNARY); } |
-	"!"  _Expression_Unary() #_Expression() { jjtn004.setExpr("!",  ExpressionType.UNARY); } |
-	"+"  _Expression_Unary() #_Expression() { jjtn005.setExpr("+",  ExpressionType.UNARY); } |
-	"-"  _Expression_Unary() #_Expression() { jjtn006.setExpr("-",  ExpressionType.UNARY); } |
-	"*"  _Expression_Unary() #_Expression() { jjtn007.setExpr("*",  ExpressionType.UNARY); } |
-	"&"  _Expression_Unary() #_Expression() { jjtn008.setExpr("&",  ExpressionType.UNARY); } |
-	_Expression_Postfix()
+	"++" _Expression_Unary() #_Expression() { jjtn001.setExpr("++", ExpressionType.UNARY); }
+|	"--" _Expression_Unary() #_Expression() { jjtn002.setExpr("--", ExpressionType.UNARY); }
+|	"~"  _Expression_Unary() #_Expression() { jjtn003.setExpr("~",  ExpressionType.UNARY); }
+|	"!"  _Expression_Unary() #_Expression() { jjtn004.setExpr("!",  ExpressionType.UNARY); }
+|	"+"  _Expression_Unary() #_Expression() { jjtn005.setExpr("+",  ExpressionType.UNARY); }
+|	"-"  _Expression_Unary() #_Expression() { jjtn006.setExpr("-",  ExpressionType.UNARY); }
+|	"*"  _Expression_Unary() #_Expression() { jjtn007.setExpr("*",  ExpressionType.UNARY); }
+|	"&"  _Expression_Unary() #_Expression() { jjtn008.setExpr("&",  ExpressionType.UNARY); }
+|	_Expression_Postfix()
 }
 
 void _Expression_Postfix() #void :
 { Token t = null, t2 = null, t3 = null, t4 = null; }
 {
 	_Expression_Primary()
-		( LOOKAHEAD(2) (
-				( /* Slice syntax */
+
+	( 	
+		/* A type suffix */
+		t = _Type_Suffix() #_Type_Suffix()
+		{ jjtn001.setIdentifier(t.image); }	
+		
+		| /** A postfix expression could consist of a type suffix or an expression. **/
+
+		( LOOKAHEAD(2)
+			(
+				( /* Array Slice syntax */
 					t = "[" ( _Expression() #_Declaration_Array_Slice_Start() )? 
 						( t2 = ":" ( _Expression() #_Declaration_Array_Slice_End() )?
 						( t3 = ":" ( _Expression() #_Declaration_Array_Slice_Skip() )? )?  )? 
 					t4 = "]"
-				) |
+				)
 				
 				/* Calling function syntax */
-				t = "(" _Declaration_Parameter_Caller_List() t2 = ")" |
+				| t = "(" _Declaration_Parameter_Caller_List() t2 = ")"
 				
-				t = "--"              | /* Decrementing             */
-				t = "++"              | /* Incrementing             */
-				t = "." _Identifier() | /* Accessing member         */
-				t = "->" _Identifier()  /* Accessing pointer member */
-					
-		) #_Expression()
-		{
-			jjtn004.setExpr(
-				t.image + 
-					(t2 != null ? t2.image : "") + 
-					(t3 != null ? t3.image : "") + 
-					(t4 != null ? t4.image : ""),  
-				ExpressionType.POST);
-			t = t2 = t3 = t4 = null;
-		} )*
+				| t = "--"               /* Decrementing             */
+				| t = "++"               /* Incrementing             */
+				| t = "."  _Identifier() /* Accessing member         */
+				| t = "->" _Identifier() /* Accessing pointer member */
+			) #_Expression()
+			{
+				jjtn005.setExpr(
+					t.image + 
+						(t2 != null ? t2.image : "") + 
+						(t3 != null ? t3.image : "") + 
+						(t4 != null ? t4.image : ""),  
+					ExpressionType.POST);
+				t = t2 = t3 = t4 = null;
+			}
+		)*
+	)		
 }
 
-void _Expression_Primary() #void : {} /* Primary Expression: <literal> | <identifier> <callerargs>? | ( expression ) | <blockunit> */
+void _Expression_Primary() #void : {} /* Primary Expression: <identifier> | <literal> | ( <expression> ) | ( <array_decl>* ) | <blockunit> | etc.. */
 {
-	LOOKAHEAD(2) _Identifier()                     |
-	LOOKAHEAD(2) _Literal()                        |
-	LOOKAHEAD(3) "(" _Expression_Wrapped() ")"     |
-	LOOKAHEAD(3) "[" ( _Declaration_Array() )* "]" |
-	LOOKAHEAD(2) _Type_Primitive()                 |
-	LOOKAHEAD(2) _BlockUnit()                      |
-	_Statement_If()                                |
-	_Statement_Switch()                            |
-	LOOKAHEAD(2) _Statement_For()                  |
-	_Statement_While()
+	/* A primary expression can be ... */
+	LOOKAHEAD(2) _Identifier()                     /* An identifier                                                        */
+|	LOOKAHEAD(2) _Literal()                        /* A literal                                                            */
+|	LOOKAHEAD(3) "(" _Expression_Wrapped() ")"     /* Another expression wrapped around (), which could be also be a tuple */
+|	LOOKAHEAD(3) "[" ( _Declaration_Array() )* "]" /* An array                                                             */
+|	LOOKAHEAD(2) _Type_Primitive()                 /* A variable type                                                      */
+|	LOOKAHEAD(2) _BlockUnit()                      /* A whole block unit                                                   */
+|	_Statement_If()                                /* An if statement                                                      */
+|	_Statement_Switch()                            /* A switch statement                                                   */
+|	LOOKAHEAD(2) _Statement_For()                  /* A for statement                                                      */
+|	_Statement_While()                             /* A while statement                                                    */
 }
 
-void _Expression_Wrapped() : {}
+void _Expression_Wrapped() : {} /* An expression wrapped with (): ( <expression> ( "," <expression>? )* )+ */
 {
 	( LOOKAHEAD(2) ( _Expression() #_Expression() ) #_Declaration_Tuple_Arg() ( "," ( LOOKAHEAD(2) _Expression() #_Expression() )? #_Declaration_Tuple_Arg() )* )+
 }
@@ -544,34 +586,38 @@ void _Expression_Wrapped() : {}
 /**------------**/
 /** Statements **/
 /**------------**/
-void _Statement_Expression() : 
+void _Statement_Expression() : /* Statement expression: <expression> <assignment>* ( ";" )? */
 { Token t = null; }
 {
-	 _Expression() #_Expression() ( LOOKAHEAD(2) _Assignment() )* ( LOOKAHEAD(2) t = ";" )?
+	_Expression() #_Expression() ( LOOKAHEAD(2) _Assignment() )* ( LOOKAHEAD(2) t = ";" )?
 	{
 		jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
 	}
 }
 
-void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|{ <all> }) (else (<blockunit>|{<all>}))? */
+void _Statement_If() : {} /* If statement: if ( <expression> ) (<blockunit>|<all>) (else (<blockunit>|<all>))? */
 {
 	<IF> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_True()
 	( LOOKAHEAD(2) <ELSE> ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_If_False() )?
 }
 
-void _Statement_Switch() : {} /* Switch statement: switch ( <match>+ ) { <switchline>+ } */
+void _Statement_Switch() : {} /* Switch statement: switch ( ( <match>,? )+ ) { <switchline>+ } */
 {
-	<SWITCH> "(" ( ( _Statement_Switch_Match_Single() ( "," )? )+ ) #_Statement_Switch_Match_List() ")" "{" ( LOOKAHEAD(2) _Statement_Switch_Line() ( "," )? )+ #_Statement_Switch_Line_List() "}"
+	<SWITCH> "(" ( ( _Statement_Switch_Match_Single() ( "," )? )+ ) #_Statement_Switch_Match_List() ")"
+	"{" ( LOOKAHEAD(2) _Statement_Switch_Line() ( "," )? )+ #_Statement_Switch_Line_List() "}"
 }
 
-void _Statement_Switch_Line() : {} /* A whole switch line */
+void _Statement_Switch_Line() : {} /* A whole switch line: @(else, <switchmatch,?>* ) : (<blockunit>|<switchmatchbody>+) */
 {
 	/* Switch condition list of a single switch line */
 	( _Declaration_Bind() ( <ELSE> | ( _Statement_Switch_Match_Single() ( "," )? )* ) ) #_Statement_Switch_Match_List() ":"
 	
 	/* Switch body list of a single switch line */
-	( LOOKAHEAD(3) _BlockUnit() #_Statement_Switch_Line_Body_List() |
-	( LOOKAHEAD(2) _Statement_Switch_Line_Body_Single() )+ #_Statement_Switch_Line_Body_List() )
+	( LOOKAHEAD(3)
+		_BlockUnit() #_Statement_Switch_Line_Body_List()
+		|
+		( LOOKAHEAD(2) _Statement_Switch_Line_Body_Single() )+ #_Statement_Switch_Line_Body_List()
+	)
 }
 
 void _Statement_Switch_Match_Single() : {} /* What a switch "matching container" / "line condition" can be matched against */
@@ -586,75 +632,79 @@ void _Statement_Switch_Line_Body_Single() #void : /* The body of a single switch
 {	
 	/* A returnable and NON-returnable expression -> a + 1 + 2 + 3 + b  !OR!  a + 1 + 2 + 3 + b; */
 	LOOKAHEAD(3) ( _Expression() ( LOOKAHEAD(2) t = ";" )? ) #_Expression()
-		{
-			jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
-		} |
-
-	LOOKAHEAD(3) _Statement()   | /* Statements -> if, switch, for, while                          */
-	LOOKAHEAD(2) _Declaration()   /* Declarations -> variables, functions, classes, structs, enums */
+	{
+		jjtn001.setExpr("(null)", ExpressionType.BLOB, (t == null));
+	}
+	
+|	LOOKAHEAD(3) _Statement()   /* Statements -> if, switch, for, while                          */
+|	LOOKAHEAD(2) _Declaration() /* Declarations -> variables, functions, classes, structs, enums */
 }
 
-void _Statement_For() : {} /* For statement: for (<declvar> : <expression> | <declvar>*;<expression>?;<expression>?) <blockunit>|<all>|; */
+void _Statement_For() : {} /* For statement: for (<declvar> : <expression> | (<declvar>,?)*;<expression>?;<expression>?) (<blockunit>|<all>|;) */
 {
 	<FOR> "("
 
-		/* Foreach declaration: */
-		( LOOKAHEAD(3) _Declaration_Variable() #_Statement_Foreach_InitBranch() ":" _Expression() #_Expression() |
+		( LOOKAHEAD(3)
+			/** Foreach declaration **/
+			_Declaration_Variable() #_Statement_Foreach_InitBranch() ":" _Expression() #_Expression()
 
-		/* Normal for declaration:        */
-		/* For loop initialization branch */
-		( ( LOOKAHEAD(3) _Declaration_Variable() | _Assignment() ) ( "," )? )* #_Statement_For_InitBranch() ";"
+			| /** or ... **/
+			
+			/** Normal for declaration        **/
+			/* For loop initialization branch  */
+			( ( LOOKAHEAD(3) _Declaration_Variable() | _Assignment() ) ( "," )? )* #_Statement_For_InitBranch() ";"
 		
-		/* For loop condition branch */
-		( _Expression() #_Expression() )? ";"
+			/* For loop condition branch */
+			( _Expression() #_Expression() )? ";"
 
-		/* For iteration branch */
-		( _Expression() #_Expression() ( "," )? )* #_Statement_For_IterateBranch() ) ")"
+			/* For iteration branch */
+			( _Expression() #_Expression() ( "," )? )* #_Statement_For_IterateBranch() 
+
+		) ")"
 
 	/* For loop body */
 	( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_For_BodyBranch()
 }
 
-void _Statement_While() : {} /* While statement: while ( <expression> ) <blockunit>|<all>|; */
+void _Statement_While() : {} /* While statement: while ( <expression> ) (<blockunit>|<all>|;) */
 {
 	<WHILE> "(" _Expression() #_Expression() ")" ( LOOKAHEAD(3) _BlockUnit() | _All() ) #_Statement_While_BodyBranch()
 }
 
-void _Statement_Flow() : 
+void _Statement_Flow() : /* A statement that disrupts the normal flow of the program. */
 { Token t; }
 {
-	( t=<CONTINUE> | t=<BREAK> | t=<RETURN> )
+	( t=<CONTINUE> | t=<BREAK> | t=<RETURN> ) ( LOOKAHEAD(2) _Expression() )?
 	{
 		jjtThis.setIdentifier(t.image);
 	}
+|	( "(" ( _Statement_Flow() )+ ")" )
 }
 
 /**-------**/
 /** Types **/
 /**-------**/
 void _Type_Primitive() : /* All primitive data types are declared here */
-{ Token t = null; }
+{ Token t; }
 {
-	_Type_Primitive_Tuple()  |
-	( t=<U8>     | t=<U16>   | t=<U32>  | t=<U64>   |
+	_Type_Primitive_Tuple()
+|	( t=<U8>     | t=<U16>   | t=<U32>  | t=<U64>   |
 	  t=<I8>     | t=<I16>   | t=<I32>  | t=<I64>   |
 	  t=<F32>    | t=<F64>   | t=<BOOL> | t=<CHAR>  |
 	  t=<STRING> | t=<USIZE> | t=<ISIZE>| t=<ARRAY> |
 	  t=<AUTO>   | t=<TYPE> )
 	{
-		if(t != null)
-			jjtThis.setTypePrimitive(t.image, TypePrimitive.values()[t.kind - U8 + 1]);
+		jjtThis.setTypePrimitive(t.image, TypePrimitive.values()[t.kind - U8 + 1]);
 	}
 }
 
-void _Type_Primitive_Tuple() :
-{}
+void _Type_Primitive_Tuple() : {} /* Tuples as primitive data types with types AND expressions: ( ( <type>|<expression> ,? )* ) */
 {
 	"(" ( LOOKAHEAD(2) ( LOOKAHEAD(3) _Type_Primitive() | _Expression() ) ( LOOKAHEAD(2) "," )? )* ")"
 }
 
-void _Type_Primitive_Tuple_TypesOnly() :
-{}
+void _Type_Primitive_Tuple_TypesOnly() : {} /* Tuples as primitive data types which contain ONLY types: ( <type> ,? )* ) */
+
 {
 	"(" ( LOOKAHEAD(2) _Type_Primitive() ( LOOKAHEAD(2) "," )? )* ")"
 }
@@ -662,11 +712,11 @@ void _Type_Primitive_Tuple_TypesOnly() :
 Token _Type_Suffix() #void : /* Supported data type suffixes */
 { Token t; }
 {
-	( t=<U8>     | t=<U16>  | t=<U32>   | t=<U64>   |
-	  t=<I8>     | t=<I16>  | t=<I32>   | t=<I64>   |
-	  t=<F32>    | t=<F64>  | t=<BOOL>  | t=<CHAR>  |
-	  t=<STRING> |t=<USIZE> | t=<ISIZE> | t=<ARRAY> |
-	  t=<AUTO>   | t=<TYPE> | t=<LITERAL_SUFFIX> )
+	( t=<U8>     | t=<U16>   | t=<U32>   | t=<U64>   |
+	  t=<I8>     | t=<I16>   | t=<I32>   | t=<I64>   |
+	  t=<F32>    | t=<F64>   | t=<BOOL>  | t=<CHAR>  |
+	  t=<STRING> | t=<USIZE> | t=<ISIZE> | t=<ARRAY> |
+	  t=<AUTO>   | t=<TYPE>  | t=<LITERAL_SUFFIX> )
 	{
 		return t;
 	}

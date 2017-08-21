@@ -207,12 +207,45 @@ char c[10][[]] = [1,[]];
 /*aa*/
 
 /** a **/
-
-//if(a)
-//a
-
 a
-Test a;
-A c, d = 1;
+Test a = 1;
+u8 c = 1, d = 1;
 
 (char,char) c = 0;
+
+char a = 1,b=1;
+
+if(a)
+a
+
+b;
+
+pub new block [1,2,[2]] {
+
+};
+
+if(1)
+a;
+
+pub new block [1,2,[2]] {
+
+}
+
+char a;
+
+u64 a (u32, i64)=foobar,b,c = foobar;
+
+u8 a(u8 x, u8 y, u8 z) = pub new n { 
+	if(x == 10) 
+		x
+	else
+		y
+}, a,b,c;
+
+1i32;
+
+((return (2)));
+
+char lotsOfOs[10:'O':2];
+
+char a;
