@@ -2,6 +2,8 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=false,VISITOR=false,TRACK_TOKENS=true,NODE_PREFIX=AST,NODE_EXTENDS=NodeSetter,NODE_FACTORY=,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package com.parser;
 
+import com.utils.Utils;
+
 public
 class SimpleNode extends NodeSetter implements Node {
 
@@ -68,7 +70,7 @@ class SimpleNode extends NodeSetter implements Node {
 	String tmp = ScriptlangParserTreeConstants.jjtNodeName[id];
     return tmp.substring(1) + 
     		((thisNode != null && 
-    		  thisNode.name != "(null)" &&
+    		  thisNode.name != Utils.NULLSTR &&
     		  thisNode.isNodeLeaf()) ? " (" + thisNode.name + ")" : "");
   }
   public String toString(String prefix) { return prefix + toString(); }

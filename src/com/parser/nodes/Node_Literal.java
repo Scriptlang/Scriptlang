@@ -15,6 +15,7 @@ public class Node_Literal extends GenericNode {
 	}
 	
 	LiteralType type = LiteralType.NULL;
+	String suffix = null;
 	int max_bitcount = 0;
 	
 	public Node_Literal() {
@@ -22,7 +23,7 @@ public class Node_Literal extends GenericNode {
 		super(Node_Literal.class);
 	}
 	
-	private void determineLiteralMaxBitcount(LiteralType type) {
+	private void determineLiteralMaxBitcount() {
 		String literalImage = name;
 		
 		/* TODO */
@@ -46,7 +47,12 @@ public class Node_Literal extends GenericNode {
 		case FLOAT64: max_bitcount = 64; break;
 		case BOOL:    max_bitcount = 1;  break;
 		case CHAR:    max_bitcount = 4;  break;
-		default: determineLiteralMaxBitcount(type); break;
+		default: /* TODO */              break;
 		}
+	}
+	
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+		determineLiteralMaxBitcount();
 	}
 }

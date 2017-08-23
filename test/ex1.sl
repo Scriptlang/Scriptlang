@@ -3,7 +3,7 @@ fn foo(u8, u16 a) {
 }
 
 struct a {
-	pub char a = 1;
+	pub char a = 1,a=2;
 };
 
 class Myclass : pub a, priv b {
@@ -95,7 +95,7 @@ switch(u8) {
 
 switch(u8) {
 	@1:
-		char i;
+		char a;
 		test();
 		1
 
@@ -153,7 +153,7 @@ for(;;) {
 	break;
 }
 
-for(auto a:a);
+for(auto a:b);
 
 
 for(auto v : arr) {
@@ -180,7 +180,7 @@ pub block {
 pub enum {
 	ENUM1,
 
-	u8 mylambda() pub a {
+	u8 mylambda() = pub a {
 		priv:
 		u8 a = 1;
 		u8 b = 2;
@@ -244,8 +244,55 @@ u8 a(u8 x, u8 y, u8 z) = pub new n {
 
 1i32;
 
-((return (2)));
+char [] charArray [1] = "string";
 
-char lotsOfOs[10:'O':2];
+a=1i32;
+
+
 
 char a;
+{
+
+char b;
+{
+	pub char c;
+}
+
+}
+
+pub (u8,u8) [] a[],b;
+
+pub char [] a(u8 x, u8 y, u8 z) = pub new n { 
+	if(x == 10) 
+		x
+	else
+		y
+}, a,b,c[];
+
+"1aasd"i312;
+
+pub test:
+
+pub class a {
+
+};
+
+struct a {
+	pub char a = 1,a=2;
+};
+
+
+pub enum {
+	ENUM1,
+
+	u8 mylambda() = pub a {
+		priv:
+		u8 a = 1;
+		u8 b = 2;
+		a + b
+	},
+	ENUM2,
+	tup(1,u8)
+};
+
+1i32;

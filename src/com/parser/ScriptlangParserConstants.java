@@ -52,75 +52,79 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int ISIZE = 28;
   /** RegularExpression Id. */
-  int AUTO = 29;
+  int ARRAY = 29;
   /** RegularExpression Id. */
-  int ARRAY = 30;
+  int AUTO = 30;
   /** RegularExpression Id. */
   int TYPE = 31;
   /** RegularExpression Id. */
-  int LITERAL_SUFFIX = 32;
+  int MOD = 32;
   /** RegularExpression Id. */
-  int LITERAL_INT_BIN = 33;
+  int LITERAL_SUFFIX = 33;
   /** RegularExpression Id. */
-  int LITERAL_INT_OCT = 34;
+  int LITERAL_INT_BIN = 34;
   /** RegularExpression Id. */
-  int LITERAL_INT_DEC = 35;
+  int LITERAL_INT_OCT = 35;
   /** RegularExpression Id. */
-  int LITERAL_INT_HEX = 36;
+  int LITERAL_INT_DEC = 36;
   /** RegularExpression Id. */
-  int LITERAL_FLOAT32 = 37;
+  int LITERAL_INT_HEX = 37;
   /** RegularExpression Id. */
-  int LITERAL_FLOAT64 = 38;
+  int LITERAL_FLOAT32 = 38;
   /** RegularExpression Id. */
-  int LITERAL_BOOL = 39;
+  int LITERAL_FLOAT64 = 39;
   /** RegularExpression Id. */
-  int FN = 40;
+  int LITERAL_BOOL = 40;
   /** RegularExpression Id. */
-  int CLASS = 41;
+  int FN = 41;
   /** RegularExpression Id. */
-  int STRUCT = 42;
+  int CLASS = 42;
   /** RegularExpression Id. */
-  int ENUM = 43;
+  int STRUCT = 43;
   /** RegularExpression Id. */
-  int PUB = 44;
+  int ENUM = 44;
   /** RegularExpression Id. */
-  int PRIV = 45;
+  int PUB = 45;
   /** RegularExpression Id. */
-  int IF = 46;
+  int PRIV = 46;
   /** RegularExpression Id. */
-  int ELSE = 47;
+  int PROT = 47;
   /** RegularExpression Id. */
-  int SWITCH = 48;
+  int IF = 48;
   /** RegularExpression Id. */
-  int FOR = 49;
+  int ELSE = 49;
   /** RegularExpression Id. */
-  int WHILE = 50;
+  int SWITCH = 50;
   /** RegularExpression Id. */
-  int BREAK = 51;
+  int FOR = 51;
   /** RegularExpression Id. */
-  int CONTINUE = 52;
+  int WHILE = 52;
   /** RegularExpression Id. */
-  int RETURN = 53;
+  int BREAK = 53;
   /** RegularExpression Id. */
-  int BIND = 54;
+  int CONTINUE = 54;
   /** RegularExpression Id. */
-  int NEW = 55;
+  int RETURN = 55;
   /** RegularExpression Id. */
-  int IDENTIFIER = 56;
+  int BIND = 56;
   /** RegularExpression Id. */
-  int CHARACTER_LITERAL = 57;
+  int NEW = 57;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 58;
+  int IDENTIFIER = 58;
   /** RegularExpression Id. */
-  int LETTER = 59;
+  int CHARACTER_LITERAL = 59;
   /** RegularExpression Id. */
-  int DIGIT_BIN = 60;
+  int STRING_LITERAL = 60;
   /** RegularExpression Id. */
-  int DIGIT_OCT = 61;
+  int LETTER = 61;
   /** RegularExpression Id. */
-  int DIGIT_DEC = 62;
+  int DIGIT_BIN = 62;
   /** RegularExpression Id. */
-  int DIGIT_HEX = 63;
+  int DIGIT_OCT = 63;
+  /** RegularExpression Id. */
+  int DIGIT_DEC = 64;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 65;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -162,9 +166,10 @@ public interface ScriptlangParserConstants {
     "\"string\"",
     "\"usize\"",
     "\"isize\"",
-    "\"auto\"",
     "\"array\"",
+    "\"auto\"",
     "\"type\"",
+    "\"module\"",
     "<LITERAL_SUFFIX>",
     "<LITERAL_INT_BIN>",
     "<LITERAL_INT_OCT>",
@@ -179,6 +184,7 @@ public interface ScriptlangParserConstants {
     "\"enum\"",
     "\"pub\"",
     "\"priv\"",
+    "\"prot\"",
     "\"if\"",
     "\"else\"",
     "\"switch\"",
@@ -198,8 +204,8 @@ public interface ScriptlangParserConstants {
     "<DIGIT_DEC>",
     "<DIGIT_HEX>",
     "\":\"",
-    "\",\"",
     "\";\"",
+    "\",\"",
     "\"(\"",
     "\")\"",
     "\"[\"",
