@@ -60,7 +60,7 @@ whole = arr[::3]    /* Whole array, steps 3 values through the array            
 /* COMMANDS */
 /*----------*/
 programsPath = cd C:\Programs;
-home = cd ~;
+home = "cd ~";
 curdir = pwd;
 filelist = ls -la;
 
@@ -213,8 +213,8 @@ struct Mystruct {
 /* CLASSES */
 /*---------*/
 class Myclass {
-pub:
-	Myclass() {
+public:
+	fn Myclass() {
 		/* Constructor */
 	}
 
@@ -222,34 +222,34 @@ pub:
 
 	}
 
-	u8 pubdata;
+	u8 publicdata;
 
-priv:
+private:
 	fn private_function() {
 
 	}
 
-	u8 privdata;
+	u8 privatedata;
 };
 
 /* We might also do: */
 class Myclass {
-	pub Myclass() {
+	public fn Myclass() {
 		/* Constructor. Must always be public */
 	}
 
-	pub fn public_function() {
+	public fn public_function() {
 
 	}
 
-	pub u8 pubdata;
+	public u8 publicdata;
 
-	priv fn private_function() {
-		/* priv keyword here is optional. Not having priv makes the function 
+	private fn private_function() {
+		/* private keyword here is optional. Not having private makes the function 
 		   private by default. */
 	}
 
-	priv u8 privdata;
+	private u8 privatedata;
 };
 
 /*-------*/
@@ -276,7 +276,7 @@ enum { /* It can be anonymous */
 	Matchstruct { /* Match this struct */
 		u8 x,y,z;
 	},
-	Tuple(u8, u16, u32) /* Match this tuple */
+	Tuple(u8, u16, u32), /* Match this tuple */
 	(u8, f64) /* Anonymous tuples are allowed */
 };
 
@@ -293,7 +293,7 @@ enum {
 enum {
 	ENUM1,
 	/* Or perhaps a function which could act as a lambda */
-	u8 mylambda() {
+	u8 mylambda() = {
 		u8 a = 1;
 		u8 b = 2;
 		a + b

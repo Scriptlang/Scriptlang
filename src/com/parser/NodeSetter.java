@@ -24,7 +24,9 @@ public class NodeSetter {
 	public GenericNode setType(String name, TypePrimitive type, TypeModifier modifier, TypeAccessModifier access) {
 		if(thisNode == null)			
 			setThisNode(new Node_Type(), name);
-		
+		else
+			thisNode.name = name + "|" + thisNode.name;
+
 		/****** If 'thisNode' NOT null: ******
 		 *  Node was already allocated.
 		 *  We might want to set some type properties instead at this point

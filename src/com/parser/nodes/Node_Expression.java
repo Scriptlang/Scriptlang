@@ -4,6 +4,7 @@ public class Node_Expression extends GenericNode {
 	
 	public enum ExpressionType {
 		NULL,
+		COND,    /* Conditional Expression    */
 		CONDOR,  /* ||                        */
 		CONDAND, /* &&                        */
 		INCOR,   /* |                         */

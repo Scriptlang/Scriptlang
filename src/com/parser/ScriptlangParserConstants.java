@@ -110,21 +110,23 @@ public interface ScriptlangParserConstants {
   /** RegularExpression Id. */
   int NEW = 57;
   /** RegularExpression Id. */
-  int IDENTIFIER = 58;
+  int UNSAFE = 58;
   /** RegularExpression Id. */
-  int CHARACTER_LITERAL = 59;
+  int IDENTIFIER = 59;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 60;
+  int CHARACTER_LITERAL = 60;
   /** RegularExpression Id. */
-  int LETTER = 61;
+  int STRING_LITERAL = 61;
   /** RegularExpression Id. */
-  int DIGIT_BIN = 62;
+  int LETTER = 62;
   /** RegularExpression Id. */
-  int DIGIT_OCT = 63;
+  int DIGIT_BIN = 63;
   /** RegularExpression Id. */
-  int DIGIT_DEC = 64;
+  int DIGIT_OCT = 64;
   /** RegularExpression Id. */
-  int DIGIT_HEX = 65;
+  int DIGIT_DEC = 65;
+  /** RegularExpression Id. */
+  int DIGIT_HEX = 66;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -195,6 +197,7 @@ public interface ScriptlangParserConstants {
     "\"return\"",
     "\"@\"",
     "\"new\"",
+    "\"unsafe\"",
     "<IDENTIFIER>",
     "<CHARACTER_LITERAL>",
     "<STRING_LITERAL>",
@@ -205,9 +208,9 @@ public interface ScriptlangParserConstants {
     "<DIGIT_HEX>",
     "\":\"",
     "\";\"",
-    "\",\"",
     "\"(\"",
     "\")\"",
+    "\",\"",
     "\"[\"",
     "\"]\"",
     "\"=\"",
@@ -221,6 +224,7 @@ public interface ScriptlangParserConstants {
     "\"|=\"",
     "\"^=\"",
     "\"%=\"",
+    "\"?\"",
     "\"||\"",
     "\"&&\"",
     "\"|\"",

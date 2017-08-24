@@ -29,8 +29,7 @@ public class Node_Type extends GenericNode {
 	/** Scriptlang data type modifiers **/
 	/**--------------------------------**/
 	public enum TypeModifier {
-		NULL,        /* (Have to keep consistency)                                    */
-		NIL,         /* Just means no modifier                                        */
+		NULL,        /* No modifier                                                   */
 		ARRAYUNIQUE, /* Arrays of the same data type                                  */
 		ARRAYSLICE,  /* A reference to a portion of an array                          */
 		TYPEDEFED,   /* Custom data type                                              */
@@ -44,8 +43,7 @@ public class Node_Type extends GenericNode {
 	/** Scriptlang data type access modifiers **/
 	/**---------------------------------------**/
 	public enum TypeAccessModifier {
-		NULL, /* (Consistency...) */
-		NIL,  /* No modifier      */
+		NULL, /* No modifier */
 		PUBLIC,
 		PRIVATE,
 		PROTECTED
