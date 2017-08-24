@@ -3,12 +3,12 @@ fn foo(u8, u16 a) {
 }
 
 struct a {
-	pub char a = 1,a=2;
+	public char a = 1,a=2;
 };
 
-class Myclass : pub a, priv b {
-pub:
-	pub fn Myclass() {
+class Myclass : public a, private b {
+public:
+	public fn Myclass() {
 		1
 	}
 
@@ -16,22 +16,22 @@ pub:
 
 	}
 
-	u8 pubdata;
+	u8 publicdata;
 
-priv:
+private:
 	fn private_function() {
 
 	}
 
-	u8 privdata;
+	u8 privatedata;
 };
 
-pub:
+public:
 u64 myval = 20+10;
-priv:
-char priv_val = 2;
+private:
+char private_val = 2;
 
-pub enum Enumlist {
+public enum Enumlist {
 	ENUM1 = 1,
 	ENUM2,
 	ENUM3,
@@ -58,7 +58,7 @@ myblock {
 }
 
 if(a) {
-	pub:
+	public:
 
 	1+2
 }
@@ -173,15 +173,15 @@ while(cond(arg1(2,3), arg2)) {
 }
 
 
-pub block {
+public block {
 
 }
 
-pub enum {
+public enum {
 	ENUM1,
 
-	u8 mylambda() = pub a {
-		priv:
+	u8 mylambda() = public a {
+		private:
 		u8 a = 1;
 		u8 b = 2;
 		a + b
@@ -194,7 +194,7 @@ char c = (u8)1;
 
 a=(u8, 1+2,2)a;
 
-pub (type, type) t = (u8,(u8,1,true));
+public (type, type) t = (u8,(u8,1,true));
 
 string a += "1".a;
 
@@ -220,14 +220,14 @@ a
 
 b;
 
-pub new block [1,2,[2]] {
+public new block [1,2,[2]] {
 
 };
 
 if(1)
 a;
 
-pub new block [1,2,[2]] {
+public new block [1,2,[2]] {
 
 }
 
@@ -235,7 +235,7 @@ char a;
 
 u64 a (u32, i64)=foobar,b,c = foobar;
 
-u8 a(u8 x, u8 y, u8 z) = pub new n { 
+u8 a(u8 x, u8 y, u8 z) = public new n { 
 	if(x == 10) 
 		x
 	else
@@ -255,14 +255,14 @@ char a;
 
 char b;
 {
-	pub char c;
+	public char c;
 }
 
 }
 
-pub (u8,u8) [] a[],b;
+public (u8,u8) [] a[],b;
 
-pub char [] a(u8 x, u8 y, u8 z) = pub new n { 
+public char [] a(u8 x, u8 y, u8 z) = public new n { 
 	if(x == 10) 
 		x
 	else
@@ -271,28 +271,33 @@ pub char [] a(u8 x, u8 y, u8 z) = pub new n {
 
 "1aasd"i312;
 
-pub test:
+public test:
 
-pub class a {
+public class a {
 
 };
 
 struct a {
-	pub char a = 1,a=2;
+	public char a = 1,a=2;
 };
 
 
-pub enum {
+public enum {
 	ENUM1,
 
-	u8 mylambda() = pub a {
-		priv:
+	u8 mylambda() = public a {
+		private:
 		u8 a = 1;
 		u8 b = 2;
 		a + b
 	},
 	ENUM2,
-	tup(1,u8)
+	a(u8,u8),
 };
 
-1i32;
+public:
+*1i31 = 1;
+
+module a = {
+
+},b;

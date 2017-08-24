@@ -48,13 +48,6 @@ public class NodeSetter {
 		return thisNode;
 	}
 	
-	public GenericNode setLiteralSuffix(String suffixImage) {
-		if(thisNode == null)
-			throw new UnsupportedOperationException();
-		((Node_Literal)thisNode).setSuffix(suffixImage);
-		return thisNode;
-	}
-	
 	public GenericNode setExpr(String exprImage, ExpressionType type, boolean returnable) {
 		setThisNode(new Node_Expression(), exprImage);
 		((Node_Expression)thisNode).set(type, returnable);

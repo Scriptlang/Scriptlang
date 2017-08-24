@@ -46,9 +46,9 @@ public class Node_Type extends GenericNode {
 	public enum TypeAccessModifier {
 		NULL, /* (Consistency...) */
 		NIL,  /* No modifier      */
-		PUB,  /* Public           */
-		PRIV, /* Private          */
-		PROT  /* Protected        */
+		PUBLIC,
+		PRIVATE,
+		PROTECTED
 	}
 
 	TypePrimitive type = TypePrimitive.NULL;

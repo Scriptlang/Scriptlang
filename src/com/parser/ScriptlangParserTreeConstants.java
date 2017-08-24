@@ -15,53 +15,50 @@ public interface ScriptlangParserTreeConstants
   public int JJT_DECLARATION_OBJECT_LIST = 9;
   public int JJT_DECLARATION_FUNCTION = 10;
   public int JJT_DECLARATION_FUNCTION_LAMBDA = 11;
-  public int JJT_DECLARATION_FUNCTION_LAMBDA_ENUM = 12;
-  public int JJT_DECLARATION_STRUCT = 13;
-  public int JJT_DECLARATION_CLASS = 14;
-  public int JJT_DECLARATION_CLASS_INHERITANCE = 15;
-  public int JJT_DECLARATION_ENUM = 16;
-  public int JJT_DECLARATION_ENUMBODY_CONST = 17;
-  public int JJT_DECLARATION_ENUMBODY_STRUCT = 18;
-  public int JJT_DECLARATION_ENUMBODY_STRUCT_BODYLESS = 19;
-  public int JJT_DECLARATION_TUPLE_NAMED = 20;
-  public int JJT_DECLARATION_TUPLE_NAMED_ARG = 21;
-  public int JJT_DECLARATION_BIND = 22;
-  public int JJT_DECLARATION_PARAMETER_LIST = 23;
-  public int JJT_DECLARATION_PARAMETER_SINGLE = 24;
-  public int JJT_DECLARATION_PARAMETER_CALLER_LIST = 25;
-  public int JJT_DECLARATION_PARAMETER_CALLER_SINGLE = 26;
-  public int JJT_EXPRESSION = 27;
-  public int JJT_DECLARATION_ARRAY_ARG = 28;
-  public int JJT_DECLARATION_ARRAY = 29;
-  public int JJT_DECLARATION_ARRAY_SLICE = 30;
-  public int JJT_DECLARATION_ARRAY_SLICE_START = 31;
-  public int JJT_DECLARATION_ARRAY_SLICE_END = 32;
-  public int JJT_DECLARATION_ARRAY_SLICE_SKIP = 33;
+  public int JJT_DECLARATION_STRUCT = 12;
+  public int JJT_DECLARATION_CLASS = 13;
+  public int JJT_DECLARATION_CLASS_INHERITANCE = 14;
+  public int JJT_DECLARATION_ENUM = 15;
+  public int JJT_DECLARATION_ENUMBODY_CONST = 16;
+  public int JJT_DECLARATION_ENUMBODY_STRUCT = 17;
+  public int JJT_DECLARATION_ENUMBODY_TUPLE = 18;
+  public int JJT_DECLARATION_ENUMBODY_TUPLE_ARG = 19;
+  public int JJT_DECLARATION_BIND = 20;
+  public int JJT_DECLARATION_PARAMETER_LIST = 21;
+  public int JJT_DECLARATION_PARAMETER_SINGLE = 22;
+  public int JJT_DECLARATION_PARAMETER_CALLER_LIST = 23;
+  public int JJT_DECLARATION_PARAMETER_CALLER_SINGLE = 24;
+  public int JJT_EXPRESSION = 25;
+  public int JJT_DECLARATION_ARRAY_ARG = 26;
+  public int JJT_DECLARATION_ARRAY = 27;
+  public int JJT_DECLARATION_ARRAY_SLICE = 28;
+  public int JJT_DECLARATION_ARRAY_SLICE_START = 29;
+  public int JJT_DECLARATION_ARRAY_SLICE_END = 30;
+  public int JJT_DECLARATION_ARRAY_SLICE_SKIP = 31;
+  public int JJT_DECLARATION_TUPLE = 32;
+  public int JJT_DECLARATION_TUPLE_ARG = 33;
   public int JJT_ASSIGNMENT = 34;
   public int JJT_ASSIGNMENT_OPERATION = 35;
   public int JJT_IDENTIFIER = 36;
   public int JJT_LITERAL = 37;
   public int JJT_LITERAL_PRIMITIVE_SUFFIX = 38;
-  public int JJT_EXPRESSION_WRAPPED = 39;
-  public int JJT_DECLARATION_TUPLE_ARG = 40;
-  public int JJT_STATEMENT_EXPRESSION = 41;
-  public int JJT_STATEMENT_IF = 42;
-  public int JJT_STATEMENT_IF_TRUE = 43;
-  public int JJT_STATEMENT_IF_FALSE = 44;
-  public int JJT_STATEMENT_SWITCH = 45;
-  public int JJT_STATEMENT_SWITCH_MATCH_LIST = 46;
-  public int JJT_STATEMENT_SWITCH_LINE_LIST = 47;
-  public int JJT_STATEMENT_SWITCH_LINE = 48;
-  public int JJT_STATEMENT_SWITCH_LINE_BODY_LIST = 49;
-  public int JJT_STATEMENT_SWITCH_MATCH_SINGLE = 50;
-  public int JJT_STATEMENT_FOR = 51;
-  public int JJT_STATEMENT_FOREACH_INITBRANCH = 52;
-  public int JJT_STATEMENT_FOR_INITBRANCH = 53;
-  public int JJT_STATEMENT_FOR_ITERATEBRANCH = 54;
-  public int JJT_STATEMENT_FOR_BODYBRANCH = 55;
-  public int JJT_STATEMENT_WHILE = 56;
-  public int JJT_STATEMENT_WHILE_BODYBRANCH = 57;
-  public int JJT_STATEMENT_FLOW = 58;
+  public int JJT_STATEMENT_EXPRESSION = 39;
+  public int JJT_STATEMENT_IF = 40;
+  public int JJT_STATEMENT_IF_TRUE = 41;
+  public int JJT_STATEMENT_IF_FALSE = 42;
+  public int JJT_STATEMENT_SWITCH = 43;
+  public int JJT_STATEMENT_SWITCH_MATCH_LIST = 44;
+  public int JJT_STATEMENT_SWITCH_LINE_LIST = 45;
+  public int JJT_STATEMENT_SWITCH_LINE = 46;
+  public int JJT_STATEMENT_SWITCH_LINE_BODY_LIST = 47;
+  public int JJT_STATEMENT_FOR = 48;
+  public int JJT_STATEMENT_FOREACH_INITBRANCH = 49;
+  public int JJT_STATEMENT_FOR_INITBRANCH = 50;
+  public int JJT_STATEMENT_FOR_ITERATEBRANCH = 51;
+  public int JJT_STATEMENT_FOR_BODYBRANCH = 52;
+  public int JJT_STATEMENT_WHILE = 53;
+  public int JJT_STATEMENT_WHILE_BODYBRANCH = 54;
+  public int JJT_STATEMENT_FLOW = 55;
 
 
   public String[] jjtNodeName = {
@@ -77,16 +74,14 @@ public interface ScriptlangParserTreeConstants
     "_Declaration_Object_List",
     "_Declaration_Function",
     "_Declaration_Function_Lambda",
-    "_Declaration_Function_Lambda_Enum",
     "_Declaration_Struct",
     "_Declaration_Class",
     "_Declaration_Class_Inheritance",
     "_Declaration_Enum",
     "_Declaration_EnumBody_Const",
     "_Declaration_EnumBody_Struct",
-    "_Declaration_EnumBody_Struct_Bodyless",
-    "_Declaration_Tuple_Named",
-    "_Declaration_Tuple_Named_Arg",
+    "_Declaration_EnumBody_Tuple",
+    "_Declaration_EnumBody_Tuple_Arg",
     "_Declaration_Bind",
     "_Declaration_Parameter_List",
     "_Declaration_Parameter_Single",
@@ -99,13 +94,13 @@ public interface ScriptlangParserTreeConstants
     "_Declaration_Array_Slice_Start",
     "_Declaration_Array_Slice_End",
     "_Declaration_Array_Slice_Skip",
+    "_Declaration_Tuple",
+    "_Declaration_Tuple_Arg",
     "_Assignment",
     "_Assignment_Operation",
     "_Identifier",
     "_Literal",
     "_Literal_Primitive_Suffix",
-    "_Expression_Wrapped",
-    "_Declaration_Tuple_Arg",
     "_Statement_Expression",
     "_Statement_If",
     "_Statement_If_True",
@@ -115,7 +110,6 @@ public interface ScriptlangParserTreeConstants
     "_Statement_Switch_Line_List",
     "_Statement_Switch_Line",
     "_Statement_Switch_Line_Body_List",
-    "_Statement_Switch_Match_Single",
     "_Statement_For",
     "_Statement_Foreach_InitBranch",
     "_Statement_For_InitBranch",
@@ -126,4 +120,4 @@ public interface ScriptlangParserTreeConstants
     "_Statement_Flow",
   };
 }
-/* JavaCC - OriginalChecksum=be9e552821962ad99e3edfc46af38128 (do not edit this line) */
+/* JavaCC - OriginalChecksum=96878e33f0f6e3f1c86277b865c59c3a (do not edit this line) */
