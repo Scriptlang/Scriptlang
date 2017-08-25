@@ -8,11 +8,11 @@ It is an intermediate language that compiles to either Batch or Shell and is cap
 
 Also, it will be possible to translate the intermediate language into any other scripting language, for example Powershell.
 
-# NOTE: This is a long term project with no release date set  
 
 # How to compile
 
 We don't have an acessible build system set in place just yet. You'll have to use Eclipse and import this project into your IDE and compile it from there.
+
 
 # How to run  
 
@@ -31,3 +31,6 @@ python test.pyc ex1.sl
 ```
 
 Make sure your current working directory is `<top>/test`.
+
+
+# NOTE: This is a long term project with no release date set  
