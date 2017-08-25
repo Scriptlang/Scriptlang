@@ -1,8 +1,9 @@
+<p align="center"><img src="https://raw.githubusercontent.com/Scriptlang/Scriptlang-Design/master/General/Resources/Logos/logo1/logo1_200x200.png"></p>
+
 # Scriptlang
 
 Scriptlang is a cross-platform solution/alternative to the current scripting languages Batch and Shell.
 
-___
 It is an intermediate language that compiles to either Batch or Shell and is capable of running its own scripts in a "JIT" fashion without having to necessarily compile to either language (which are platform dependent).
 
 Also, it will be possible to translate the intermediate language into any other scripting language, for example Powershell.
