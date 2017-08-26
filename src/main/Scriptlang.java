@@ -1,10 +1,10 @@
 package main;
 
-import com.parser.AST_Root;
-import com.parser.ScriptlangParser;
-import com.parser.SimpleNode;
-import com.dbg.*;
-import com.jit.JITCompiler;
+import com.slang.backend.jitcompiler.JITCompiler;
+import com.slang.frontend.parser.AST_Root;
+import com.slang.frontend.parser.ScriptlangParser;
+import com.slang.frontend.parser.SimpleNode;
+import com.slang.utils.dbg.*;
 
 public class Scriptlang {
 	public static void help() {

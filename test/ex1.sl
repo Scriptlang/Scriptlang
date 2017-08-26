@@ -301,3 +301,11 @@ public:
 module a = {
 
 },b;
+
+u8 a(u8,u8) = new {
+	printf("Run");
+};
+
+module a = new {
+	printf("Run");
+};
