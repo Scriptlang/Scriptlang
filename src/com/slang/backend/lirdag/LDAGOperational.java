@@ -1,6 +1,6 @@
-package com.slang.backend.isdag;
+package com.slang.backend.lirdag;
 
-public class DAGOperational {
+public class LDAGOperational {
 	
 	/** These nodes represent
 	 *  the operational constructs of the language that

@@ -1,6 +1,6 @@
-package com.slang.backend.isdag;
+package com.slang.backend.lirdag;
 
-public class DAGStructural {
+public class LDAGStructural {
 	
 	/** These nodes represent
 	 *  the structural constructs/data types of the language
