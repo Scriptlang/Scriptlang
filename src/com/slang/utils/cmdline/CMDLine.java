@@ -6,9 +6,9 @@ import java.util.List;
 public class CMDLine {
 	
 	public static class Option { /* Example option: -c -o --flag1 --flag2 */
-		String flag;
-		String description;
-		String value;
+		public String flag;
+		public String description;
+		public String value;
 		boolean isSingle;  /* Is flag described by - or --? */
 		
 		/* Is this argument purely a value?
