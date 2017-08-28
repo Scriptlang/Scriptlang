@@ -3,40 +3,45 @@ package main;
 import com.slang.backend.compiler.CompilationUnit;
 import com.slang.backend.compiler.Compiler;
 import com.slang.backend.jitcompiler.JITCompiler;
-import com.slang.backend.lirdag.LDAG;
-import com.slang.backend.target.translator.Translator;
 import com.slang.frontend.parser.AST_Root;
 import com.slang.frontend.parser.ScriptlangParser;
 import com.slang.frontend.parser.SimpleNode;
 import com.slang.frontend.parser.hirdag.HDAG;
 import com.slang.frontend.parser.hirdag.HDAGLegalize;
-import com.slang.frontend.parser.hirdag.HDAGLower;
+import com.slang.utils.cmdline.CMDLine;
 import com.slang.utils.dbg.*;
 
 public class Scriptlang {
-	
-	public static void help() {
-		Dbg.setDebugging(true);
-		Dbg.log("HELP\n\nUsage: java -jar sl.jar <testfile>\nExample: java -jar sl.jar ex1.sl\n");
-	}
 
 	public static void main(String[] args) throws Exception {
-		/* Check command line arguments */
-		if(args.length < 1) {
-			help();
-			System.exit(1);
-		}
+		/* Setup supported Command Line flags */
+		CMDLine.addFlags(
+			"dbg", "Enable debugging messages",
+			"jit", "Compile BlockUnit IR HDAG and Execute it on the VM"
+		);
 		
-		/* Enable debugging messages */
-		Dbg.setDebugging(true);
-		
+		/* Execute help method with the following settings */
+		CMDLine.setHelpCondition(
+			CMDLine.HelpCondition.WHEN_NOARGS,        /* Call help() when user does not provide arguments */
+			CMDLine.HelpResponse.HELP_AND_QUIT,       /* When help() is called, also quit the program     */
+			CMDLine.HelpResponse.HELP_WARNONLY_NOHELP /* On an invalid flag, only warn the user           */
+		);
+
+		/* Set usage message */
+		CMDLine.setUsage("java -jar sl.jar <testfile>\\nExample: java -jar sl.jar ex1.sl");
+
+		/* Parse Command Line arguments */
+		CMDLine.parse(args);
+
+		/* Enable or disable debugging messages */		
+		Dbg.setDebugging(CMDLine.hasOption("dbg"));
+
 		/* Instantiate parser */
 		ScriptlangParser parser = new ScriptlangParser(new java.io.FileInputStream(args[0]));
 		
+		/* Parse and Dump AST */
 		Dbg.log("1: Parsing '"+ args[0] +"'...");
 		parser._Root();
-		
-		/* Dump the AST structure */
 		if(Dbg.isDebugging())
 			Dbg.log("Dumping Root AST..." + ((SimpleNode)parser.rootNode()).dumpStr("* ") + "\n");
 
