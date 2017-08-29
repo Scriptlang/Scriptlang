@@ -23,25 +23,22 @@ public class CMDLine {
 			this.flag = flag;
 			isDefault = false;
 			supported = false;
+			value = null;
 			
 			if(description != null) {
 				Matcher matcher = Pattern.compile("(.+?);(.+)").matcher(description);
 				if(matcher.matches()) {
-					this.supportedValues = matcher.group(1);
-					this.description = matcher.group(2);
+					this.supportedValues = matcher.group(1).trim();
+					this.description = matcher.group(2).trim();
 				} else {
-					this.supportedValues = "";
 					this.description = description;
 				}
-			} else {
-				this.supportedValues = null;
 			}
 		}
 		
 		public Option(char flag, String description) {
 			init(flag + "", description);
 			isSingle = true;
-
 		}
 		
 		public Option(String flag, String description) {
@@ -55,13 +52,15 @@ public class CMDLine {
 
 		public String toString() {
 			if(!isDefault) {
+				String ret = (isSingle ? "-" : "--") + flag + (supportedValues != null ? " " + supportedValues : "");
+				
 				/* Output Option as a flag */
 				if(description != null) {
 					/* Output Option flag as a supported Option */
-					return String.format("%-10s\t%s", (isSingle ? "-" : "--") + flag + " " + supportedValues, description);
+					return String.format("%-10s\t%s", ret, description);
 				} else {
 					/* Output Option flag as a parsed Option */
-					return (isSingle ? "-" : "--") + flag + " " + supportedValues + (value != null ? "=" + value : "");
+					return ret + (value != null ? "=" + value : "");
 				}
 			} else {
 				/* Output Option as a value */
@@ -94,6 +93,8 @@ public class CMDLine {
 		optionsSupported = new ArrayList<Option>();
 		optionsParsed = new ArrayList<Option>();
 		initialized = true;
+		
+		CMDLine.addFlags("help", "Display this help message");
 	}
 	
 	private static char isOption(String opt) {
@@ -109,13 +110,21 @@ public class CMDLine {
 		
 		if(opt.indexOf("--") == 0) {
 			/* It's a string flag */
-			if(opt.length() == 2)
-				return 4; /* This string flag is not long enough. It's only made of '--' */
+			if(opt.length() == 2 || opt.charAt(2) == '=') {
+				/* This string flag is not long enough. It's only made of '--'. It's invalid. */
+				return 4;
+			}
 			return 2;
 		} else if(opt.indexOf("-") == 0) {
 			/* It's a single character flag */
-			if(opt.length() > 2)
-				return 3; /* This single character flag is more than 1 character long (too long) */
+			if(opt.length() != 2) {
+				if(opt.contains("=") && opt.length() > 2) {
+					/* It's a single character flag with an equals in front of it. It's VALID. */
+					return 1;
+				}
+				/* This single character flag is longer/shorter than 1 character. It's invalid. */
+				return 3;
+			}
 			return 1;
 		} else {
 			/* It's a pure value */
@@ -125,7 +134,7 @@ public class CMDLine {
 	
 	private static void pushSingle(char flag, String value) {
 		/* Check if flag is supported first */
-		boolean supported = isFlagValid(flag + "", value, false);
+		boolean supported = isFlagValid(flag + "", value, true);
 
 		Option opt = new Option(flag, null);
 		opt.value = value;
@@ -141,6 +150,9 @@ public class CMDLine {
 		opt.value = value;
 		opt.supported = supported;
 		optionsParsed.add(opt);
+		
+		if(flag.equals("help"))
+			help(); /* Trigger help */
 	}
 
 	private static boolean isFlagValid(String flag, String value, boolean isSingle) {
@@ -186,7 +198,7 @@ public class CMDLine {
 	
 	private static String dump(List<Option> options, boolean defaultsOnly) {
 		String strBuild = "";
-		for(Option option : options) {
+		for(Option option : options) {			
 			if(defaultsOnly) {
 				if(option.isDefault)
 					strBuild += option.toString() + "\n";
@@ -194,7 +206,10 @@ public class CMDLine {
 					continue;
 			}				
 			else {
-				strBuild += option.toString() + "\n";
+				if(option.isDefault)
+					continue;
+				else
+					strBuild += option.toString() + "\n";
 			}
 		}
 		return strBuild;
@@ -231,27 +246,71 @@ public class CMDLine {
 				switch(opt_type) {
 				case 1:
 					/* Found single character flag */
-					if(i < args.length - 2) {
-						String arg2Cleaned = args[i+1].trim();
-						if(isOption(arg2Cleaned) > 0)
-							pushSingle(argCleaned.charAt(1), null);
-						else
-							pushSingle(argCleaned.charAt(1), arg2Cleaned);
+					if(i < args.length - 1) {
+						/**************************/						
+						if(argCleaned.contains("=")) {
+							Matcher match = Pattern.compile("(.+?)=(.+)").matcher(argCleaned);
+							if(match.matches())
+								pushSingle(argCleaned.charAt(1), match.group(2).trim());
+							else
+								pushSingle(argCleaned.charAt(1), null);
+						} else {
+							String arg2Cleaned = args[i+1].trim();
+							if(isOption(arg2Cleaned) > 0) {
+								pushSingle(argCleaned.charAt(1), null);
+							} else {
+								i++; /* Consume the following argument */
+								pushSingle(argCleaned.charAt(1), arg2Cleaned);
+							}
+						}
+						/**************************/		
 					} else {
-						pushSingle(argCleaned.charAt(1), null);
+						/**************************/
+						if(argCleaned.contains("=")) {
+							Matcher match = Pattern.compile("(.+?)=(.+)").matcher(argCleaned);
+							if(match.matches())
+								pushSingle(argCleaned.charAt(1), match.group(2).trim());
+							else
+								pushSingle(argCleaned.charAt(1), null);
+						} else {
+							pushSingle(argCleaned.charAt(1), null);
+						}
+						/**************************/
 					}
 					break;
 				case 2: {
 					/* Found string flag */
 					String argSubstr = argCleaned.substring(2, argCleaned.length());
-					if(i < args.length - 2) {
-						String arg2Cleaned = args[i+1].trim();
-						if(isOption(arg2Cleaned) > 0)
-							push(argSubstr, null);
-						else
-							push(argSubstr, arg2Cleaned);
+					if(i < args.length - 1) {
+						/**************************/
+						if(argSubstr.contains("=")) {
+							Matcher match = Pattern.compile("(.+?)=(.+)").matcher(argSubstr);
+							if(match.matches())
+								push(match.group(1).trim(), match.group(2).trim());
+							else
+								push(argSubstr.substring(0, argSubstr.indexOf("=")).trim(), null);				
+						} else {
+							String arg2Cleaned = args[i+1].trim();
+							if(isOption(arg2Cleaned) > 0) {
+								push(argSubstr, null);
+							} else {
+								i++; /* Consume the following argument */
+								push(argSubstr, arg2Cleaned);
+							}	
+						}
+						/**************************/
 					} else {
-						push(argSubstr, null);
+						/**************************/
+						if(argSubstr.contains("=")) {
+							Matcher match = Pattern.compile("(.+?)=(.+)").matcher(argSubstr);
+							if(match.matches())
+								push(match.group(1).trim(), match.group(2).trim());
+							else
+								push(argSubstr.substring(0, argSubstr.indexOf("=")).trim(), null);
+						} else {
+							push(argSubstr, null);
+						}
+						/**************************/
 					}
 					break;
 				}
@@ -314,12 +373,17 @@ public class CMDLine {
 		if(!initialized) initializeCMDLine();
 		usage = "Usage: " + usageMessage + "\n";
 	}
+	
+	public static String getUsage() {
+		if(!initialized) initializeCMDLine();
+		return usage;
+	}
 
 	public static<T> Option query(T opt, int nth) {		
 		for(Option option : optionsParsed) {
 			if(((opt instanceof Character && option.isSingle) ||
 					(opt instanceof String && !option.isSingle))
-				&& option.flag.equals(opt))
+				&& option.flag.equals(opt + ""))
 			{
 				if(--nth > 0) continue;
 				else return option;
@@ -387,5 +451,5 @@ public class CMDLine {
 	
 	public static void dumpDefaults() {
 		System.out.print(dumpDefaultsToStr());
-	}
+	}	
 }
