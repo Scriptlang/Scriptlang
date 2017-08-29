@@ -2,12 +2,15 @@ package com.slang.utils.cmdline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CMDLine {
 	
-	public static class Option { /* Example option: -c -o --flag1 --flag2 */
+	public static class Option { /* Example option: -c -o --flag1 --flag2 value */
 		public String flag;
 		public String description;
+		public String supportedValues;
 		public String value;
 		boolean isSingle;  /* Is flag described by - or --? */
 		
@@ -16,20 +19,30 @@ public class CMDLine {
 		boolean isDefault;
 		boolean supported; /* Is this a supported known flag */
 		
-		public Option(char flag, String description) {
-			this.flag = flag + "";
-			this.description = description;
-			isSingle = true;
+		private void init(String flag, String description) {
+			this.flag = flag;
 			isDefault = false;
 			supported = false;
+
+			Matcher matcher = Pattern.compile("(.+?);(.+)").matcher(description);
+			if(matcher.matches()) {
+				this.supportedValues = matcher.group(1);
+				this.description = matcher.group(2);
+			} else {
+				this.supportedValues = "";
+				this.description = description;
+			}
+		}
+		
+		public Option(char flag, String description) {
+			init(flag + "", description);
+			isSingle = true;
+
 		}
 		
 		public Option(String flag, String description) {
-			this.flag = flag;
-			this.description = description;
+			init(flag, description);
 			isSingle = false;
-			isDefault = false;
-			supported = false;
 		}
 		
 		public void setValue(String value) {
@@ -41,10 +54,10 @@ public class CMDLine {
 				/* Output Option as a flag */
 				if(description != null) {
 					/* Output Option flag as a supported Option */
-					return (isSingle ? "-" : "--") + flag + "\t\t" + description;
+					return String.format("%-20s\t%s", (isSingle ? "-" : "--") + flag + " " + supportedValues, description);
 				} else {
 					/* Output Option flag as a parsed Option */
-					return (isSingle ? "-" : "--") + flag + (value != null ? "=" + value : "");
+					return (isSingle ? "-" : "--") + flag + " " + supportedValues + (value != null ? "=" + value : "");
 				}
 			} else {
 				/* Output Option as a value */
@@ -59,10 +72,10 @@ public class CMDLine {
 	}
 	
 	public enum HelpResponse {
-		NULL,                /* Only show the help message without quitting the program                                       */
-		HELP_AND_QUIT,       /* Execute help method and close program afterwards                                              */
-		HELP_WARNONLY,       /* Same as before but instead of quitting on a not supported flag it will just ignore it         */
-		HELP_WARNONLY_NOHELP /* Same as before but help is not called                                                         */
+		NULL,                /* Only show the help message without quitting the program                               */
+		HELP_AND_QUIT,       /* Execute help method and close program afterwards                                      */
+		HELP_WARNONLY,       /* Same as before but instead of quitting on a not supported flag it will just ignore it */
+		HELP_WARNONLY_NOHELP /* Same as before but help is not called                                                 */
 	}
 	
 	private static List<Option> optionsSupported = null;
@@ -125,7 +138,7 @@ public class CMDLine {
 		opt.supported = supported;
 		optionsParsed.add(opt);
 	}
-	
+
 	private static boolean isFlagValid(String flag, String value, boolean isSingle) {
 		for(Option supportedOption : optionsSupported) {
 			if(supportedOption.isSingle == isSingle && 
@@ -269,7 +282,6 @@ public class CMDLine {
 		if(!initialized) initializeCMDLine();
 
 		for(int i = 0; i <= options_obj.length - 2; i += 2) {
-			
 			if(options_obj[i] instanceof Character && options_obj[i + 1] instanceof String) {
 				/* Add single character flag */
 				optionsSupported.add(new Option((Character)options_obj[i], (String)options_obj[i + 1]));
