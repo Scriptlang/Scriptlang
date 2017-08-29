@@ -23,14 +23,18 @@ public class CMDLine {
 			this.flag = flag;
 			isDefault = false;
 			supported = false;
-
-			Matcher matcher = Pattern.compile("(.+?);(.+)").matcher(description);
-			if(matcher.matches()) {
-				this.supportedValues = matcher.group(1);
-				this.description = matcher.group(2);
+			
+			if(description != null) {
+				Matcher matcher = Pattern.compile("(.+?);(.+)").matcher(description);
+				if(matcher.matches()) {
+					this.supportedValues = matcher.group(1);
+					this.description = matcher.group(2);
+				} else {
+					this.supportedValues = "";
+					this.description = description;
+				}
 			} else {
-				this.supportedValues = "";
-				this.description = description;
+				this.supportedValues = null;
 			}
 		}
 		
@@ -54,7 +58,7 @@ public class CMDLine {
 				/* Output Option as a flag */
 				if(description != null) {
 					/* Output Option flag as a supported Option */
-					return String.format("%-20s\t%s", (isSingle ? "-" : "--") + flag + " " + supportedValues, description);
+					return String.format("%-10s\t%s", (isSingle ? "-" : "--") + flag + " " + supportedValues, description);
 				} else {
 					/* Output Option flag as a parsed Option */
 					return (isSingle ? "-" : "--") + flag + " " + supportedValues + (value != null ? "=" + value : "");
