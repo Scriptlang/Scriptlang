@@ -31,7 +31,7 @@ public class CMDLine {
 					this.supportedValues = matcher.group(1).trim();
 					this.description = matcher.group(2).trim();
 				} else {
-					this.description = description;
+					this.description = description.trim();
 				}
 			}
 		}
