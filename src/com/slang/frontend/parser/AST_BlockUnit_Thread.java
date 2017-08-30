@@ -11,6 +11,10 @@ class AST_BlockUnit_Thread extends SimpleNode {
   public AST_BlockUnit_Thread(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=ccc5609cf78cfce88e0c24d9dbbb40d0 (do not edit this line) */

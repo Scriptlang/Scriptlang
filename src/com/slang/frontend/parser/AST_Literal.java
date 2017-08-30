@@ -12,5 +12,9 @@ class AST_Literal extends SimpleNode {
     super(p, id);
   }
 
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
+  
 }
 /* JavaCC - OriginalChecksum=73a9b563193c8d49db0e1a830c14890d (do not edit this line) */

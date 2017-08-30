@@ -11,6 +11,10 @@ class AST_Declaration_EnumBody_Const extends SimpleNode {
   public AST_Declaration_EnumBody_Const(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=46d31a594d5717e58ada83ce046cda4a (do not edit this line) */

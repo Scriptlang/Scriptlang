@@ -11,6 +11,10 @@ class AST_Expression_Conditional_If_False extends SimpleNode {
   public AST_Expression_Conditional_If_False(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=9adc5a88ad2c0eb5782ef9900574aee8 (do not edit this line) */

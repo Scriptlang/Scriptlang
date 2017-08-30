@@ -11,6 +11,10 @@ class AST_Declaration_Bind extends SimpleNode {
   public AST_Declaration_Bind(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=82ecc271735edf5a2645f5519c903901 (do not edit this line) */

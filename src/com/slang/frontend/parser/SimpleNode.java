@@ -2,7 +2,10 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=false,VISITOR=false,TRACK_TOKENS=true,NODE_PREFIX=AST,NODE_EXTENDS=NodeSetter,NODE_FACTORY=,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package com.slang.frontend.parser;
 
+import java.util.Arrays;
+
 import com.slang.utils.Utils;
+import com.slang.utils.dbg.Dbg;
 
 public
 class SimpleNode extends NodeSetter implements Node {
@@ -45,6 +48,9 @@ class SimpleNode extends NodeSetter implements Node {
   }
 
   public Node jjtGetChild(int i) {
+    if(children[i] == null) {
+      throw new UnsupportedOperationException("(@Legal) Node #" + i + " is null.");
+    }
     return children[i];
   }
 
@@ -97,6 +103,36 @@ class SimpleNode extends NodeSetter implements Node {
 
   public int getId() {
     return id;
+  }
+
+  @Override
+  public Node legalizeAllChildren(Node parent, int astDepth) {
+	  int childCount = jjtGetNumChildren();
+	  String debugSpacingStr = "";
+	  
+	  if(astDepth > 0) {
+		  char[] debugSpacing = new char[astDepth * 3];
+		  Arrays.fill(debugSpacing, '_');
+		  debugSpacingStr = new String(debugSpacing);
+	  }
+	  
+	  String debugMsg = "(@" + this + " ch: " + childCount + " lvl: " + astDepth + ")";
+	  Dbg.log("|" + debugSpacingStr + debugMsg);
+	  
+	  Node nodeLegalized = legalize(parent, astDepth);
+	  if(nodeLegalized == null)
+		  throw new UnsupportedOperationException("Node '" + this + "' is invalid (not legal).");
+	  
+	  for(int i = 0; i < childCount; i++) {
+		  /* Now legalize all children */
+		  jjtGetChild(i).legalizeAllChildren(nodeLegalized, astDepth + 1);
+	  }
+	  
+	  return nodeLegalized;
+  }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  throw new UnsupportedOperationException("Legal method UNIMPLEMENTED @ Node '" + this + "' & Parent '" + parent + "'");  
   }
 }
 

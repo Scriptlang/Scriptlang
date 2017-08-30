@@ -12,5 +12,12 @@ class AST_Root extends SimpleNode {
     super(p, id);
   }
 
+  public Node legalize(Node parent, int astDepth) {
+	  if(parent != null || astDepth > 0)
+		  return null;
+	  else
+		  return this;
+  }
+
 }
 /* JavaCC - OriginalChecksum=0f2a6b62fa60786d1a0ec2d8a82924a8 (do not edit this line) */

@@ -11,6 +11,10 @@ class AST_BlockUnit extends SimpleNode {
   public AST_BlockUnit(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=bbd7c0acaa14def461ed4aa82631f811 (do not edit this line) */

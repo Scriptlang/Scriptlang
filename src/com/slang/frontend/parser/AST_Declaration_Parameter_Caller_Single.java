@@ -11,6 +11,10 @@ class AST_Declaration_Parameter_Caller_Single extends SimpleNode {
   public AST_Declaration_Parameter_Caller_Single(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=4e9a807c1673fcad0b0bde0f89348eae (do not edit this line) */

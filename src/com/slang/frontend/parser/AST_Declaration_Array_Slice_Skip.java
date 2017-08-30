@@ -11,6 +11,10 @@ class AST_Declaration_Array_Slice_Skip extends SimpleNode {
   public AST_Declaration_Array_Slice_Skip(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=a6c53314df87c3ccd3a793bfe1fc9db7 (do not edit this line) */

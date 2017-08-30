@@ -11,6 +11,10 @@ class AST_Statement_If_True extends SimpleNode {
   public AST_Statement_If_True(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=de377c8b73740a3b12c7d21dd69c780b (do not edit this line) */

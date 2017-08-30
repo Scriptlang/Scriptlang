@@ -11,6 +11,10 @@ class AST_Statement_While_BodyBranch extends SimpleNode {
   public AST_Statement_While_BodyBranch(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=e6d5dfd5c96656ac23d87d37402520fa (do not edit this line) */

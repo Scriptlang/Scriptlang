@@ -11,6 +11,10 @@ class AST_Statement_For_IterateBranch extends SimpleNode {
   public AST_Statement_For_IterateBranch(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=8deb5ae137202d3269509e8684d6c13f (do not edit this line) */

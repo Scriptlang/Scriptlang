@@ -11,6 +11,10 @@ class AST_Literal_Primitive_Suffix_Custom extends SimpleNode {
   public AST_Literal_Primitive_Suffix_Custom(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=6563ef7bce6ee4aab73ab093413faa32 (do not edit this line) */

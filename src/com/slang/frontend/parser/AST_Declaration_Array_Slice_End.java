@@ -11,6 +11,10 @@ class AST_Declaration_Array_Slice_End extends SimpleNode {
   public AST_Declaration_Array_Slice_End(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=d51405c2a901c2d6b3bfa9aa99d28ad9 (do not edit this line) */

@@ -11,6 +11,10 @@ class AST_Statement_Empty extends SimpleNode {
   public AST_Statement_Empty(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=b9e2ec54098a6257006dba229a135074 (do not edit this line) */

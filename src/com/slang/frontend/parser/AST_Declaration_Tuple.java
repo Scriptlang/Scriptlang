@@ -11,6 +11,10 @@ class AST_Declaration_Tuple extends SimpleNode {
   public AST_Declaration_Tuple(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=a0930d4fa04e62e30afa5c0f1a441b1e (do not edit this line) */

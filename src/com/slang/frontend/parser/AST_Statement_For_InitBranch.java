@@ -11,6 +11,10 @@ class AST_Statement_For_InitBranch extends SimpleNode {
   public AST_Statement_For_InitBranch(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=d5df16f9ea84e9630dd9be60995927c4 (do not edit this line) */

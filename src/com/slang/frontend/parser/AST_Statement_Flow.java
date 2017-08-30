@@ -11,6 +11,10 @@ class AST_Statement_Flow extends SimpleNode {
   public AST_Statement_Flow(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=ca79f083a19db6ad334507270c60fbd1 (do not edit this line) */

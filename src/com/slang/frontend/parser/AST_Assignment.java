@@ -11,6 +11,10 @@ class AST_Assignment extends SimpleNode {
   public AST_Assignment(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=48549ca71fd23e756dec474a06bfdfc0 (do not edit this line) */

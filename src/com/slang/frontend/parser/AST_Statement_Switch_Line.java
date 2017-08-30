@@ -11,6 +11,10 @@ class AST_Statement_Switch_Line extends SimpleNode {
   public AST_Statement_Switch_Line(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=2ad8e6f68c776dd219b3e8d58e3409da (do not edit this line) */

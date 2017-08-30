@@ -11,6 +11,10 @@ class AST_Declaration_Enum extends SimpleNode {
   public AST_Declaration_Enum(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=515c858d52fcba87c47d3a34afa69209 (do not edit this line) */

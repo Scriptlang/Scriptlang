@@ -11,6 +11,10 @@ class AST_Label extends SimpleNode {
   public AST_Label(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=596be754bf423492bec8ac352939bc1c (do not edit this line) */

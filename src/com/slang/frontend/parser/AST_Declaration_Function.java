@@ -11,6 +11,10 @@ class AST_Declaration_Function extends SimpleNode {
   public AST_Declaration_Function(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=8a998b2fd72c95a97f31ec5001596f10 (do not edit this line) */

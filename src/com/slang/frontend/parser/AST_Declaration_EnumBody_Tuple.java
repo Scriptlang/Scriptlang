@@ -11,6 +11,10 @@ class AST_Declaration_EnumBody_Tuple extends SimpleNode {
   public AST_Declaration_EnumBody_Tuple(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=416aee5a90755c05925f110765dd244e (do not edit this line) */

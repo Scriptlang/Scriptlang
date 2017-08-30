@@ -11,6 +11,10 @@ class AST_Statement_Switch_Match_List extends SimpleNode {
   public AST_Statement_Switch_Match_List(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=c83ae39f6d34933972f7369d672a6e64 (do not edit this line) */

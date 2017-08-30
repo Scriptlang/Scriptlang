@@ -11,6 +11,10 @@ class AST_Statement_Switch_Line_Body_List extends SimpleNode {
   public AST_Statement_Switch_Line_Body_List(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=2f106b98461bc7a4c0da2734f04051e6 (do not edit this line) */

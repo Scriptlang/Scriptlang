@@ -11,6 +11,10 @@ class AST_Identifier extends SimpleNode {
   public AST_Identifier(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=50901840243876635ae46248bfb23d39 (do not edit this line) */

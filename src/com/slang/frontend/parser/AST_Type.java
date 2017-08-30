@@ -11,6 +11,10 @@ class AST_Type extends SimpleNode {
   public AST_Type(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=30eb1c2b745e28764dc1d8a374e7df82 (do not edit this line) */

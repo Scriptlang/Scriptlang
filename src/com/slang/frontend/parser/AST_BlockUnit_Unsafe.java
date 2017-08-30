@@ -11,6 +11,10 @@ class AST_BlockUnit_Unsafe extends SimpleNode {
   public AST_BlockUnit_Unsafe(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=655da9cebb56eec813917dd42ba38c45 (do not edit this line) */

@@ -34,5 +34,9 @@ interface Node {
   public int jjtGetNumChildren();
 
   public int getId();
+
+  public Node legalizeAllChildren(Node parent, int astDepth);
+  
+  public Node legalize(Node parent, int astDepth);
 }
 /* JavaCC - OriginalChecksum=d7eb3b6fbb8383f60c10b1e8866a3adf (do not edit this line) */

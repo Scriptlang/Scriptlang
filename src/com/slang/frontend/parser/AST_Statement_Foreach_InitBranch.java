@@ -11,6 +11,10 @@ class AST_Statement_Foreach_InitBranch extends SimpleNode {
   public AST_Statement_Foreach_InitBranch(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=2797d6268c08972c69a491b40b67b32b (do not edit this line) */

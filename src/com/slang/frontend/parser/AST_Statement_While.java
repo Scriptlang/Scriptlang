@@ -11,6 +11,10 @@ class AST_Statement_While extends SimpleNode {
   public AST_Statement_While(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=8c4668f45ba15ad302a023795dbba8ea (do not edit this line) */

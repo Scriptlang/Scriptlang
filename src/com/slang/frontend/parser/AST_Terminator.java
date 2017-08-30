@@ -11,6 +11,10 @@ class AST_Terminator extends SimpleNode {
   public AST_Terminator(ScriptlangParser p, int id) {
     super(p, id);
   }
+  
+  public Node legalize(Node parent, int astDepth) {
+	  return null;
+  }
 
 }
 /* JavaCC - OriginalChecksum=1cffe890beb0b3c3b76dc37e2cda41c9 (do not edit this line) */
